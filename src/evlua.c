@@ -27,7 +27,7 @@ LUALIB_API int luaopen_evlua(lua_State *L) {
     pthread_atfork(0, 0, ev_default_fork);
 
     // Create the table we return:
-    lua_createtable(L, 0, 5);
+    lua_createtable(L, 0, 10);
 
     // Initialize the shared stuff:
     evlua_open_shared(L);
@@ -48,6 +48,16 @@ LUALIB_API int luaopen_evlua(lua_State *L) {
 
     lua_pushcfunction(L, evlua_obj_count);
     lua_setfield(L, -2, "object_count");
+
+    // Exported constants:
+    lua_pushnumber(L, EV_READ);
+    lua_setfield(L, -2, "READ");
+
+    lua_pushnumber(L, EV_WRITE);
+    lua_setfield(L, -2, "WRITE");
+
+    lua_pushnumber(L, EV_TIMEOUT);
+    lua_setfield(L, -2, "TIMEOUT");
 
     return 1;
 }

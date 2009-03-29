@@ -11,13 +11,14 @@ local loop    = evlua.Loop.default
 
 -- Simply see if we can do a simple one second timer:
 function test_basic() 
-   local io1 =
-      evlua.IO.new(function(timer)
-                        ok(true, 'one second timer')
-                     end, 1)
+   local io1 = evlua.IO.new(
+      function(loop, io, revents)
+         ok(true, 'STDIN is writable')
+         io:stop(loop)
+      end, 1, evlua.WRITE)
    io1:start(loop)
    loop:loop()
 end
 
 -- TODO: Need to deal wit file descriptors.
-noleaks(test_basic(), "test_basic");
+noleaks(test_basic, "test_basic");

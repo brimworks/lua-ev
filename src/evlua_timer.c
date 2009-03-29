@@ -70,6 +70,8 @@ static int timer_start(lua_State *L) {
     struct ev_loop* loop   = loop_check(L, 2)->obj;
     int is_daemon          = lua_toboolean(L, 3);
 
+    if ( ! lua_isboolean(L, 3) ) is_daemon = -1;
+
     ev_timer_start(loop, timer);
     evlua_loop_ref(L, 2, 1, is_daemon);
 
