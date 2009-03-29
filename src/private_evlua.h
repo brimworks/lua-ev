@@ -4,6 +4,21 @@
 #include <lua.h>
 #include <ev.h>
 
+#define EVLUA_LOOP  "evlua.loop.ud"
+#define EVLUA_TIMER "evlua.timer.ud"
+#define EVLUA_IO    "evlua.io.ud"
+#define EVLUA_WATCHER_FUNCTION 1
+
+/**
+ * Various wrappers to evlua_obj_check:
+ */
+#define loop_check(L, narg) \
+    ((struct evlua_loop*)evlua_obj_check((L), (narg), EVLUA_LOOP))
+#define timer_check(L, narg) \
+    ((struct ev_timer*)evlua_obj_check((L), (narg), EVLUA_TIMER))
+#define io_check(L, narg) \
+    ((struct ev_io*)evlua_obj_check((L), (narg), EVLUA_IO))
+
 /**
  * Wrap the ev_loop object so we can resolve back to the lua table
  * that backs this object.
@@ -18,128 +33,116 @@ struct evlua_loop {
  * Here is a high level overview of how evlua integrates libev with
  * lua:
  *
- * loop: lua table with:
- *    LUA_NOREF - the ev_loop C struct.
- *    1..N - active watchers.
+ * All objects are represented as tables with a LUA_NOREF element that
+ * is a userdata for the underlying C structure.
+ *
+ * loop: Keeps a reference to all active watchers so they don't get
+ *    GC'ed.
  *
  * watcher: lua table with:
- *    1 - the ev_watcher_* C struct.
- *    2 - the callback function.
- *
+ *    1 - the callback function.
  */
-
-/**
- * Location in LUA_REGISTRYINDEX of evlua registry.
- */
-extern int evlua_registry;
-
-
-/**
- * Verify watchers are properly GC'ed:
- *
- * [-0, +1, -]
- */
-int evlua_watcher_count(lua_State *L);
 
 /**
  * Initialize various submodules.
  *
  * [-0, +1, e]
  */
-int luaopen_evlua_timer(lua_State *L);
-int luaopen_evlua_io(lua_State *L);
-int luaopen_evlua_loop(lua_State *L);
+void evlua_open_timer(lua_State *L);
+void evlua_open_io(lua_State *L);
+void evlua_open_loop(lua_State *L);
+// [-0, +0, e]
+void evlua_open_shared(lua_State *L);
 
 
 /**
- * Extract the ev_loop* user data from the table in narg location on
- * the stack.
+ * Look inside and see how many objects are registed in the registry.
+ * This is used so we can assert that garbage is properly collected in
+ * our unit tests.
+ *
+ * [-0, +1, -]
+ */
+int evlua_obj_count(lua_State *L);
+
+/**
+ * Retrieve the object referred to by ref from the registry.
+ *
+ * @param L The lua_State
+ * @param ref The value assigned to on evlua_obj_init.
+ *
+ * [-0, +1, v]
+ */
+void evlua_obj_get(lua_State* L, int ref);
+
+/**
+ * Create a table that is registered in the evlua_registry.  This
+ * table will contain a userdata of <size> in the LUA_NOREF index of
+ * this table.  The metatable of the userdata and table will both be
+ * set.  The resultant table is left on the stack, the userdata is
+ * returned as a void* and *ref is assigned to be the index in the
+ * evlua_registry of the table.
+ *
+ * @param L The lua_State
+ * @param size The amount of space needed for the user data.
+ * @param type_userdata The metatable of the userdata, it must end in
+ *      ".ud" and if ".ud" is removed, that should be the type of the
+ *      table.
+ * @param ref Assigned to the location in the registry.
+ *
+ * [-0, +1, v]
+ */
+void* evlua_obj_init(lua_State *L, size_t size, char* type_userdata, int* ref);
+
+/**
+ * Call when an object is destroyed.
+ */
+void evlua_obj_delete(lua_State* L);
+
+/**
+ * Retrieve the userdata for the table which contains a userdata in
+ * LUA_NOREF.
+ *
+ * @param L The lua_State
+ * @param ud The location of the userdata in the stack.
+ * @param type_userdata The name of the metatable that the userdata is
+ *      expected to be.
  *
  * [-0, +0, v]
  */
-struct evlua_loop* evlua_check_loop(lua_State *L, int narg);
+void* evlua_obj_check(lua_State *L, int ud, char* type_userdata);
 
 /**
- * Extract the ev_watcher* user data from the table in narg location
- * on the stack.  Validates that the watcher of specified watcher
- * type.
+ * Add a reference to watcher from loop.  Mark this as a "daemon"
+ * watcher if you don't want the watcher to prevent the event loop
+ * from terminating.
  *
- * [-0, +0, v]
+ * @param loop_idx the index of the loop table.
+ * @param watcher_idx the index of the watcher table.
+ * @param is_daemon true, false or -1 to indicate that any current
+ *     value for the daemon flag should be preserved.
+ *
+ * [-0, +0, m]
  */
-void* evlua_check_watcher(lua_State *L, int narg, char* type);
+void evlua_loop_ref(lua_State* L, int loop_idx, int watcher_idx, int is_daemon);
 
 /**
- * Each watcher table is expected to contain these data elements.
+ * Remove a reference to watcher from loop.
+ *
+ * [-0, +0, m]
  */
-enum evlua_idx_t {
-    idx_watcher=1, /** Watcher userdata */
-    idx_func       /** The function called when an event occurs */
-    /* if you add more items, be sure to update idx_max */
-};
-#define idx_max idx_func
-
+void evlua_loop_unref(lua_State* L, int loop_idx, int watcher_idx);
 
 /**
+ * Generic callback for all watchers.  Expects <loop> to be on the top
+ * of the stack!
  *
- * [-0, +0, v]
+ * [-0, +0, m]
  */
-void evlua_unref_impl(lua_State *L, EV_P_ void** data);
-
-void evlua_watcher_cb(lua_State *L, EV_P_ void* data, int revents);
+void evlua_cb(struct ev_loop *loop, int watcher_ref, int revents, int is_active);
 
 /**
- * loop - The location on the stack of the loop table.
- *
- * func - The location on the stack of the callback function.
- *
- * size - The size of the watcher structures being created.
- *
- * type - The name of the metatable associated with the watcher table.
- *
- * ud_type - The name of the metatable associated with the user data.
+ * Get the thread local lua_State that was set when the event loop was started.
  */
-void* evlua_watcher_new(lua_State *L, int loop, int func, size_t size, char* type, char* ud_type);
-
-int evlua_watcher_delete(lua_State *L);
-
-struct ev_loop* evlua_watcher_loop(lua_State *L, int tbl);
-
-// defined in evlua_loop.c:
 lua_State* evlua_loop_state();
-void evlua_loop_set_state(lua_State* L);
-
-// We use the most-significant-bit (MSB) to determine the status of
-// the ref_flag.  Here are some macros to make it easier to get/set
-// the "self" and "ref_flag":
-#define MSB_MASK  (1 << (sizeof(int)*8 - 1))
-#define SIGN_MASK (1 << (sizeof(int)*8 - 2))
-
-// Restore the sign extension;
-#define get_self(data) \
-    ( SIGN_MASK & ((int)data) ? MSB_MASK | ((int)data) : ~MSB_MASK & ((int)data) )
-
-#define get_unref_flag(data) \
-    ( MSB_MASK & ((int)data) )
-
-#define merge_self_unref_flag(self, unref_flag) \
-    (void*)( (unref_flag) ? MSB_MASK | (self) : ~MSB_MASK & (self) )
-
-// Convenience macros:
-#define evlua_maybe_unref(L, loop, watcher) do {                \
-        if ( ! ev_is_pending(watcher) &&                        \
-             ! ev_is_active(watcher) )                          \
-            evlua_unref_impl((L), (loop), &(watcher)->data);    \
-    } while(0)
-
-#define evlua_ref(L, loop, watcher, idx, unref)                 \
-    evlua_ref_impl((L), loop, &((watcher)->data), (idx), (unref))
-
-// Type specific implementation in macro form:
-#define IMPLEMENT_WATCHER_TYPE(TYPE)                                    \
-    void evlua_##TYPE##_cb(struct ev_loop* loop, struct ev_##TYPE *w, int revents) { \
-        lua_State*        L = evlua_loop_state();                       \
-        evlua_watcher_cb(L, loop, w->data, revents);                    \
-        evlua_maybe_unref(L, loop, w);                                  \
-    }
 
 #endif /* PRIVATE_EVLUA */

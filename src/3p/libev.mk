@@ -11,7 +11,7 @@ OBJS:=$(addprefix $(dir.TMP)/3p/libev/, \
 $(dir.LIB)/libev.so: OBJS:=$(OBJS)
 $(dir.LIB)/libev.so: $(OBJS)
 	@mkdir -p $(dir $@)
-	$(LINKER) -o $@ $(addprefix -L,$(LIBS)) $(OBJS)
+	$(LIB_LINKER) -o $@ $(addprefix -L,$(LIBS)) $(OBJS)
 
 ######################################################################
 # Export headers:

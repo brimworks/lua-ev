@@ -3,6 +3,7 @@
 #include <lauxlib.h>
 #include <pthread.h>
 #include <ev.h>
+#include <string.h>
 
 /**
  * Thread local storage for the lua_State object.
@@ -29,6 +30,50 @@ void evlua_loop_set_state(lua_State* L) {
     pthread_setspecific(tls_L, L);
 }
 
+/**
+ * @see header
+ *
+ * [-0, +0, m]
+ */
+void evlua_loop_ref(lua_State* L, int loop_idx, int watcher_idx, int is_daemon) {
+    lua_pushvalue(L, watcher_idx); // {watcher}
+    lua_rawget(L, ( loop_idx < 0 ? loop_idx-1 : loop_idx )); // bool
+    int current_is_daemon = lua_toboolean(L, -1);
+    lua_pop(L, 1); // <empty>
+
+    if ( -1 == is_daemon ) is_daemon = current_is_daemon;
+    if ( is_daemon ^ current_is_daemon ) {
+        struct ev_loop* loop = loop_check(L, loop_idx)->obj;
+        if ( is_daemon ) {
+            ev_unref(loop);
+        } else {
+            ev_ref(loop);
+        }
+    }
+    lua_pushvalue(L, watcher_idx); // {watcher}
+    lua_pushboolean(L, is_daemon); // {watcher}, bool
+    lua_rawset(L, ( loop_idx < 0 ? loop_idx-2 : loop_idx )); // <empty>
+}
+
+/**
+ * @see header
+ *
+ * [-0, +0, m]
+ */
+void evlua_loop_unref(lua_State* L, int loop_idx, int watcher_idx) {
+    lua_pushvalue(L, watcher_idx); // {watcher}
+    lua_rawget(L, ( loop_idx < 0 ? loop_idx-1 : loop_idx )); // bool
+    int is_daemon = lua_toboolean(L, -1);
+    lua_pop(L, 1); // <empty>
+    if ( is_daemon ) {
+        struct ev_loop* loop = loop_check(L, loop_idx)->obj;
+        ev_ref(loop);
+    }
+    lua_pushvalue(L, watcher_idx); // {watcher}
+    lua_pushnil(L); // {watcher}, nil
+    lua_rawset(L, ( loop_idx < 0 ? loop_idx-2 : loop_idx )); // <empty>
+}
+
 //////////////////////////////////////////////////////////////////////
 // PRIVATE:
 //////////////////////////////////////////////////////////////////////
@@ -49,55 +94,12 @@ static void make_tls_L() {
  * [-0, +1, v]
  */
 static struct evlua_loop* loop_init(lua_State *L) {
-
-    // Create table, set metatable:
-    lua_createtable(L, 5, 1);  // {}
-    luaL_getmetatable(L, "evlua.loop"); // {}, {evlua.loop}
-    lua_setmetatable(L, -2); // {}
-
-    // Register the table:
-    lua_rawgeti(L, LUA_REGISTRYINDEX, evlua_registry); // {}, {reg}
-    lua_pushvalue(L, -2); // {}, {reg}, {}
-    int objid = luaL_ref(L, -2); // {}, {reg}
-    lua_pop(L, 1); // {}
-
-    // Create the loop:
+    int ref;
     struct evlua_loop* loop = (struct evlua_loop*)
-        lua_newuserdata(L, sizeof(struct evlua_loop)); // {}, ud
+        evlua_obj_init(L, sizeof(struct evlua_loop), EVLUA_LOOP, &ref);
     loop->obj = NULL;
-    loop->ref = objid;
-
-    luaL_getmetatable(L, "evlua.loop.ud"); // {}, ud, {evlua.loop.ud}
-    lua_setmetatable(L, -2); // {}, ud
-    lua_rawseti(L, -2, LUA_NOREF); // {}
-
+    loop->ref = ref;
     return loop;
-}
-
-/**
- * Given the narg index of a loop object table, returns a pointer to
- * the ev_loop.
- *
- * [-0, +0, v]
- */
-struct evlua_loop* evlua_check_loop(lua_State *L, int narg) {
-    luaL_checktype(L, narg, LUA_TTABLE);
-    lua_rawgeti(L, narg, LUA_NOREF); // ud
-    void *p = lua_touserdata(L, -1);
-    if ( p != NULL ) {
-        if ( lua_getmetatable(L, -1) ) { // ud, meta
-            lua_getfield(L, LUA_REGISTRYINDEX, "evlua.loop.ud");
-            // ud, meta, {evlua.loop.ud}
-            if ( lua_rawequal(L, -1, -2) ) {
-                lua_pop(L, 3);
-                return p;
-            }
-        }
-    }
-    const char *msg = lua_pushfstring(L, "evlua.loop.ud expected, got %s",
-                                      luaL_typename(L, -1));
-    luaL_argerror(L, narg, msg);
-    return NULL;
 }
 
 /**
@@ -112,11 +114,13 @@ static int loop_new(lua_State *L) {
  * Delete a loop instances.
  */
 static int loop_delete(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
 
     // Never destroy default loop:
     if ( ev_is_default_loop(loop) ) return 0;
+
     ev_loop_destroy(loop);
+    evlua_obj_delete(L);
 
     return 0;
 }
@@ -125,7 +129,7 @@ static int loop_delete(lua_State *L) {
  * Check if this is the default event loop.
  */
 static int loop_is_default(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
     lua_pushboolean(L, ev_is_default_loop(loop));
     return 1;
 }
@@ -134,7 +138,7 @@ static int loop_is_default(lua_State *L) {
  * How many times have we iterated though the event loop?
  */
 static int loop_count(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
     lua_pushinteger(L, ev_loop_count(loop));
     return 1;
 }
@@ -143,7 +147,7 @@ static int loop_count(lua_State *L) {
  * The current event loop time.
  */
 static int loop_now(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
     lua_pushnumber(L, ev_now(loop));
     return 1;
 }
@@ -153,7 +157,7 @@ static int loop_now(lua_State *L) {
  * time.
  */
 static int loop_update_now(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
     ev_now_update(loop);
     lua_pushnumber(L, ev_now(loop));
     return 1;
@@ -163,7 +167,7 @@ static int loop_update_now(lua_State *L) {
  * Actually do the event loop.
  */
 static int loop_loop(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
 
     evlua_loop_set_state(L);
     ev_loop(loop, 0);
@@ -175,7 +179,7 @@ static int loop_loop(lua_State *L) {
  * "Quit" out of the event loop.
  */
 static int loop_unloop(lua_State *L) {
-    struct ev_loop* loop = evlua_check_loop(L, 1)->obj;
+    struct ev_loop* loop = loop_check(L, 1)->obj;
     ev_unloop(loop, EVUNLOOP_ALL);
     return 0;
 }
@@ -185,10 +189,7 @@ static int loop_unloop(lua_State *L) {
  */
 static void create_evlua_loop_ud(lua_State *L) {
     // userdata metatable:
-    luaL_newmetatable(L, "evlua.loop.ud");
-
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
+    luaL_newmetatable(L, EVLUA_LOOP);
 
     lua_pushcfunction(L, loop_delete);
     lua_setfield(L, -2, "__gc");
@@ -200,10 +201,13 @@ static void create_evlua_loop_ud(lua_State *L) {
  */
 static void create_evlua_loop(lua_State *L) {
     // loop metatable:
-    luaL_newmetatable(L, "evlua.loop");
+    lua_createtable(L, 0, 0); // {1}
+    lua_pushlstring(L, EVLUA_LOOP, strlen(EVLUA_LOOP)-3); // {1}, "loop"
+    lua_pushvalue(L, -2); // {1}, "loop", {1}
+    lua_rawset(L, LUA_REGISTRYINDEX); // {1}
 
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
+    lua_pushvalue(L, -1); // {1}, {1}
+    lua_setfield(L, -2, "__index"); // {1}
 
     static luaL_reg m_loop_fn[] = {
         { "is_default", loop_is_default },
@@ -214,15 +218,15 @@ static void create_evlua_loop(lua_State *L) {
         { "unloop",     loop_unloop },
         { NULL, NULL }
     };
-    luaL_register(L, NULL, m_loop_fn);
-    lua_pop(L, 1);
+    luaL_register(L, NULL, m_loop_fn); // {1}
+    lua_pop(L, 1); // <empty>
 }
 
 /**
  * Create the table that will be registered as evlua.loop (aka the
  * loop static methods).
  */
-int luaopen_evlua_loop(lua_State *L) {
+void evlua_open_loop(lua_State *L) {
     create_evlua_loop_ud(L);
     create_evlua_loop(L);
 
@@ -233,6 +237,4 @@ int luaopen_evlua_loop(lua_State *L) {
 
     loop_init(L)->obj = ev_default_loop(EVFLAG_AUTO);
     lua_setfield(L, -2, "default");
-
-    return 1;
 }

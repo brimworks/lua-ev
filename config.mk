@@ -1,3 +1,5 @@
+SPACE := $(NULL) # space.
+
 BUILD := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))build)
 SRC   := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))src)
 
@@ -19,10 +21,15 @@ BUILD_LIBEV := 1
 # Path to any include directories needed:
 INCLUDES = $(dir.INCLUDE)
 
-# Path to any lib directories neede:
+# Path to any lib directories needed:
 LIBS = $(dir.LIB)
 
-# Platform specific compiler flags:
-CFLAGS = -Wall -Werror -fPIC -std=gnu99 -pedantic -g $(addprefix -I,$(INCLUDES))
-LINKER = gcc -dynamiclib
+# Path to location of lua interpreter:
+BINS = $(dir.BIN)
 
+LINK_FLAGS.lua = -lreadline
+
+# Platform specific compiler flags:
+CFLAGS = -DLUA_USE_LINUX -Wall -fPIC -std=gnu99 -pedantic -g $(addprefix -I,$(INCLUDES))
+LIB_LINKER = gcc -dynamiclib
+APP_LINKER = gcc

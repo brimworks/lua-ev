@@ -7,8 +7,10 @@
 # Default target:
 all:
 
-.PHONY: all clean
+.PHONY: all clean test
 .DELETE_ON_ERROR:
+
+test: | all
 
 # Include our configurations:
 include $(dir $(lastword $(MAKEFILE_LIST)))config.mk
@@ -31,23 +33,7 @@ endif
 
 ######################################################################
 # Build evlua.so:
-all: $(dir.LIB_LUA)/evlua.so
-OBJS:=$(addprefix $(dir.TMP)/, \
-  evlua.o evlua_io.o evlua_loop.o evlua_timer.o evlua_watcher.o \
-)
-$(dir.LIB_LUA)/evlua.so: OBJS:=$(OBJS)
-$(dir.LIB_LUA)/evlua.so: $(OBJS)
-	@mkdir -p $(dir $@)
-	$(LINKER) -o $@ $(addprefix -L,$(LIBS)) -llua -lev $(OBJS)
-ifneq ($(BUILD_LUA),)
-  $(dir.LIB_LUA)/evlua.so: $(dir.LIB)/liblua.so
-  $(OBJS): | lua.headers
-endif
-ifneq ($(BUILD_LIBEV),)
-  $(dir.LIB_LUA)/evlua.so: $(dir.LIB)/libev.so
-  $(OBJS): | libev.headers
-endif
-######################################################################
+include $(SRC)/evlua.mk
 
 ######################################################################
 # Include makefiles for building lua and libev:

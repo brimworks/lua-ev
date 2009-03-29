@@ -1,6 +1,7 @@
 ######################################################################
 # Build liblua.so:
-all: $(dir.LIB)/liblua.so
+all: $(dir.LIB)/liblua.so $(dir.BIN)/lua $(dir.BIN)/luac
+
 OBJS:=$(addprefix $(dir.TMP)/3p/lua/src/, \
 	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
@@ -12,7 +13,29 @@ OBJS:=$(addprefix $(dir.TMP)/3p/lua/src/, \
 $(dir.LIB)/liblua.so: OBJS:=$(OBJS)
 $(dir.LIB)/liblua.so: $(OBJS)
 	@mkdir -p $(dir $@)
-	$(LINKER) -o $@ $(addprefix -L,$(LIBS)) $(OBJS)
+	$(LIB_LINKER) -o $@ $(LINK_FLAGS.liblua) $(addprefix -L,$(LIBS)) $(OBJS)
+
+######################################################################
+
+OBJS:=$(addprefix $(dir.TMP)/3p/lua/src/, \
+	luac.o print.o \
+)
+
+$(dir.BIN)/luac: OBJS:=$(OBJS)
+$(dir.BIN)/luac: $(OBJS) $(dir.LIB)/liblua.so
+	@mkdir -p $(dir $@)
+	$(APP_LINKER) -o $@ $(LINK_FLAGS.luac) -llua $(addprefix -L,$(LIBS)) $(OBJS)
+
+######################################################################
+
+OBJS:=$(addprefix $(dir.TMP)/3p/lua/src/, \
+	lua.o \
+)
+
+$(dir.BIN)/lua: OBJS:=$(OBJS)
+$(dir.BIN)/lua: $(OBJS) $(dir.LIB)/liblua.so
+	@mkdir -p $(dir $@)
+	$(APP_LINKER) -o $@ $(LINK_FLAGS.lua) -llua $(addprefix -L,$(LIBS)) $(OBJS)
 
 ######################################################################
 # Export headers:

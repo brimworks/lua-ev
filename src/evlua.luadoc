@@ -1,0 +1,81 @@
+#!lua
+
+--- EvLua exposes libev functionality to lua.
+module "evlua"
+
+--- The version of libev in use as a floating point.
+-- @return floating point version number.
+function version()
+end
+
+local Loop = {};
+
+--- An instance of the default event loop.
+-- @return a new non-default loop object.
+function Loop.new()
+   local instance = {};
+
+   --- Is this the default loop?
+   -- @return boolean
+   function instance:is_default()
+   end
+
+   --- How many times have we iterated over the event loop?
+   -- @return number
+   function instance:count()
+   end
+
+   --- What time did this event loop iteration start?
+   -- @return epoch floating point seconds.
+   function instance:now()
+   end
+
+   --- Update the event loops idea of when the event loop iteration started.
+   -- @return epoch floating point seconds of current time.
+   function instance:update_now()
+   end
+
+   --- Run the event loop until no more events are to be processed, or someone "unloop"s.
+   function instance:loop()
+   end
+
+   --- Terminate the current event loop in a non-disruptive way.
+   function instance:unloop()
+   end
+
+   --- TODO:
+   function instance:once(int fd, int events, float timeout, function callback)
+   end
+end
+
+--- Returns the default event loop.
+function Loop.default()
+   return Loop.new();
+end
+
+----------------------------------------------------------------------
+-- TODO:
+
+-- Generic functions in common with all watchers.
+function watcher:start(loop)
+end
+
+function watcher:stop(loop)
+end
+
+function watcher:is_active()
+end
+
+function watcher:is_pending()
+end
+
+function watcher:clear_pending()
+end
+
+--- Set/get callback (when setting, returns the old callback)
+function watcher:callback(callback)
+end
+
+--- Get/set the priority of this watcher (when setting returns the old priority).
+function watcher:priority(priority)
+end
