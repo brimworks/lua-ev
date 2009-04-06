@@ -46,7 +46,7 @@ LUALIB_API int luaopen_evlua(lua_State *L) {
     lua_pushcfunction(L, version);
     lua_setfield(L, -2, "version");
 
-    lua_pushcfunction(L, evlua_obj_count);
+    lua_pushcfunction(L, evlua_reg_count);
     lua_setfield(L, -2, "object_count");
 
     // Exported constants:

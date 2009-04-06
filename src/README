@@ -22,20 +22,21 @@ EVLUA:
 
 IMPLEMENTATION NOTES:
 
-  * All objects are allocated via lua_newuserdata() and stored in a
-    table that is returned from the new() functions.  This is done in
-    preference to using the registry so the garbage collector can
-    effectively determine when watcher/loops are no longer used.
+  * All objects are allocated via lua_newuserdata(), all user data
+    items are registered in a weak table and the C structures index
+    into this registry so we can go from C struct -> Lua userdata.
+    Any Lua state for the userdata is tracked in the fenv of the user
+    data.
 
-  * A reference to all active watchers is stored in the loop to avoid
-    premature garbage collection.
+  * The callbacks registered always assume the loop userdata is at the
+    top of the Lua stack.  This means that you should only call
+    ev_loop from Lua (perhaps we can remove this limitation in the
+    future?)
 
 TODO LIST:
 
 These are things that I would like to see done before this code can be
 considered "stable":
-
- * Represent loop objects as a table containing the ev_loop.
 
  * When executing callback if we have an error handle OOM possible
    exception. (low priority)

@@ -4,44 +4,20 @@
 #include <lua.h>
 #include <ev.h>
 
-#define EVLUA_LOOP  "evlua.loop.ud"
-#define EVLUA_TIMER "evlua.timer.ud"
-#define EVLUA_IO    "evlua.io.ud"
+#define EVLUA_LOOP  "evlua.loop"
+#define EVLUA_TIMER "evlua.timer"
+#define EVLUA_IO    "evlua.io"
 #define EVLUA_WATCHER_FUNCTION 1
 
 /**
- * Various wrappers to evlua_obj_check:
+ * Various wrappers to luaL_checkudata:
  */
 #define loop_check(L, narg) \
-    ((struct evlua_loop*)evlua_obj_check((L), (narg), EVLUA_LOOP))
+    (*((struct ev_loop**)luaL_checkudata((L), (narg), EVLUA_LOOP)))
 #define timer_check(L, narg) \
-    ((struct ev_timer*)evlua_obj_check((L), (narg), EVLUA_TIMER))
+    ((struct ev_timer*)luaL_checkudata((L), (narg), EVLUA_TIMER))
 #define io_check(L, narg) \
-    ((struct ev_io*)evlua_obj_check((L), (narg), EVLUA_IO))
-
-/**
- * Wrap the ev_loop object so we can resolve back to the lua table
- * that backs this object.
- */
-struct evlua_loop {
-    struct ev_loop* obj;
-    int             ref;
-};
-
-
-/**
- * Here is a high level overview of how evlua integrates libev with
- * lua:
- *
- * All objects are represented as tables with a LUA_NOREF element that
- * is a userdata for the underlying C structure.
- *
- * loop: Keeps a reference to all active watchers so they don't get
- *    GC'ed.
- *
- * watcher: lua table with:
- *    1 - the callback function.
- */
+    ((struct ev_io*)luaL_checkudata((L), (narg), EVLUA_IO))
 
 /**
  * Initialize various submodules.
@@ -62,17 +38,17 @@ void evlua_open_shared(lua_State *L);
  *
  * [-0, +1, -]
  */
-int evlua_obj_count(lua_State *L);
+int evlua_reg_count(lua_State *L);
 
 /**
  * Retrieve the object referred to by ref from the registry.
  *
  * @param L The lua_State
- * @param ref The value assigned to on evlua_obj_init.
+ * @param ref The value assigned to on evlua_reg_init.
  *
  * [-0, +1, v]
  */
-void evlua_obj_get(lua_State* L, int ref);
+void evlua_reg_get(lua_State* L, int ref);
 
 /**
  * Create a table that is registered in the evlua_registry.  This
@@ -83,33 +59,18 @@ void evlua_obj_get(lua_State* L, int ref);
  * evlua_registry of the table.
  *
  * @param L The lua_State
- * @param size The amount of space needed for the user data.
- * @param type_userdata The metatable of the userdata, it must end in
- *      ".ud" and if ".ud" is removed, that should be the type of the
- *      table.
+ * @param c_type The C type we are creating.
+ * @param lua_type The string name of the metatable name.
  * @param ref Assigned to the location in the registry.
  *
  * [-0, +1, v]
  */
-void* evlua_obj_init(lua_State *L, size_t size, char* type_userdata, int* ref);
+void* evlua_watcher_new(lua_State *L, size_t c_type_size, char* lua_type, int* ref);
 
 /**
  * Call when an object is destroyed.
  */
-void evlua_obj_delete(lua_State* L);
-
-/**
- * Retrieve the userdata for the table which contains a userdata in
- * LUA_NOREF.
- *
- * @param L The lua_State
- * @param ud The location of the userdata in the stack.
- * @param type_userdata The name of the metatable that the userdata is
- *      expected to be.
- *
- * [-0, +0, v]
- */
-void* evlua_obj_check(lua_State *L, int ud, char* type_userdata);
+void evlua_reg_delete(lua_State* L);
 
 /**
  * Add a reference to watcher from loop.  Mark this as a "daemon"

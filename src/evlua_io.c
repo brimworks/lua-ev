@@ -19,15 +19,10 @@ static int io_new(lua_State *L) {
 
     int ref;
     struct ev_io* io = (struct ev_io*)
-        evlua_obj_init(L, sizeof(struct ev_io), EVLUA_IO, &ref);
+        evlua_watcher_new(L, sizeof(struct ev_io), EVLUA_IO, &ref);
     // {io}
-    lua_pushvalue(L, 1);
-    // {io}, func
-    lua_rawseti(L, -2, EVLUA_WATCHER_FUNCTION);
-    // {io}
-    io->data = (void*)ref;
-
     ev_io_init(io,  &io_cb, fd, events);
+    io->data = (void*)ref;
 
     return 1;
 }
@@ -35,7 +30,7 @@ static int io_new(lua_State *L) {
 // io:stop(loop)
 static int io_stop(lua_State *L) {
     struct ev_io* io     = io_check(L, 1);
-    struct ev_loop* loop = loop_check(L, 2)->obj;
+    struct ev_loop* loop = loop_check(L, 2);
 
     ev_io_stop(loop, io);
     evlua_loop_unref(L, 2, 1);
@@ -46,7 +41,7 @@ static int io_stop(lua_State *L) {
 // io:start(loop [, is_daemon])
 static int io_start(lua_State *L) {
     struct ev_io* io     = io_check(L, 1);
-    struct ev_loop* loop = loop_check(L, 2)->obj;
+    struct ev_loop* loop = loop_check(L, 2);
     int is_daemon        = lua_toboolean(L, 3);
 
     if ( ! lua_isboolean(L, 3) ) is_daemon = -1;
@@ -78,7 +73,7 @@ static int io_is_pending(lua_State *L) {
 // revents = io:clear_pending(loop)
 static int io_clear_pending(lua_State *L) {
     struct ev_io* io     = io_check(L, 1);
-    struct ev_loop* loop = loop_check(L, 2)->obj;
+    struct ev_loop* loop = loop_check(L, 2);
 
     int revents = ev_clear_pending(loop, io);
     if ( ! ev_is_active(io) ) evlua_loop_unref(L, 2, 1);
@@ -88,34 +83,22 @@ static int io_clear_pending(lua_State *L) {
 }
 
 static int io_delete(lua_State *L) {
-    evlua_obj_delete(L);
+    evlua_reg_delete(L);
     return 0;
 }
 
 // old_callback = io:callback([new_callback])
 int io_callback(lua_State *L) {
-    io_check(L, 1);
     int n = lua_gettop(L);
-    lua_rawgeti(L, 1, EVLUA_WATCHER_FUNCTION);
+    io_check(L, 1);
+    lua_getfenv(L, 1); // {io}
+    lua_rawgeti(L, -1, EVLUA_WATCHER_FUNCTION); // {io}, func
     if ( n > 1 ) {
         luaL_checktype(L, 2, LUA_TFUNCTION);
-        lua_pushvalue(L, 2);
-        lua_rawseti(L, 1, EVLUA_WATCHER_FUNCTION);
+        lua_pushvalue(L, 2); // {io}, func, new_func
+        lua_rawseti(L, -3, EVLUA_WATCHER_FUNCTION);
     }
     return 1;
-}
-
-/**
- * Create the evlua.io.ud metatable.
- */
-static void create_evlua_io_ud(lua_State *L) {
-    // userdata metatable:
-    luaL_newmetatable(L, EVLUA_IO); // {}
-
-    lua_pushcfunction(L, io_delete); // {}, func
-    lua_setfield(L, -2, "__gc");  // {}
-
-    lua_pop(L, 1); // <empty>
 }
 
 /**
@@ -123,10 +106,7 @@ static void create_evlua_io_ud(lua_State *L) {
  */
 static void create_evlua_io(lua_State *L) {
     // io metatable:
-    lua_createtable(L, 0, 0); // {1}
-    lua_pushlstring(L, EVLUA_IO, strlen(EVLUA_IO)-3); // {1}, "io"
-    lua_pushvalue(L, -2); // {1}, "io", {1}
-    lua_rawset(L, LUA_REGISTRYINDEX); // {1}
+    luaL_newmetatable(L, EVLUA_IO); // {}
 
     lua_pushvalue(L, -1); // {1}, {1}
     lua_setfield(L, -2, "__index"); // {1}
@@ -138,6 +118,7 @@ static void create_evlua_io(lua_State *L) {
         { "is_pending",    io_is_pending },
         { "clear_pending", io_clear_pending },
         { "callback",      io_callback },
+        { "__gc",          io_delete },
         { NULL, NULL }
     };
     luaL_register(L, NULL, m_io_fn); // {1}
@@ -146,7 +127,6 @@ static void create_evlua_io(lua_State *L) {
 
 // Returns a table to be registered by evlua.io
 void evlua_open_io(lua_State *L) {
-    create_evlua_io_ud(L);
     create_evlua_io(L);
 
     // At this point only one static method:
