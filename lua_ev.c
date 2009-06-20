@@ -13,7 +13,7 @@ static int version(lua_State *L) {
 }
 
 // module name (that argument is ignored).
-LUALIB_API int luaopen_evlua(lua_State *L) {
+LUALIB_API int luaopen_ev(lua_State *L) {
 
     // Assert that we get an acceptable libev.so version:
     assert(ev_version_major() == EV_VERSION_MAJOR &&

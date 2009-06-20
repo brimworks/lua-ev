@@ -1,17 +1,17 @@
 print '1..17'
 
 local tap   = require("tap")
-local evlua = require("evlua")
+local ev = require("ev")
 local help  = require("test_help")
 local dump  = require("dumper").dump
 local ok    = tap.ok
 
 local noleaks = help.collect_and_assert_no_watchers
-local loop = evlua.Loop.default
+local loop = ev.Loop.default
 
 -- Simply see if we can do a simple one second timer:
 function test_basic() 
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function(loop, timer)
          ok(true, 'one second timer')
       end,
@@ -24,7 +24,7 @@ end
 -- Test daemon=true on timer()
 function test_daemon_true()
    local timer1_count = 0
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function(loop, timer)
          timer1_count = timer1_count + 1
          ok(timer1_count == 1, 'once and only once')
@@ -32,7 +32,7 @@ function test_daemon_true()
    timer1:start(loop)
 
    local timer2_count = 0
-   local timer2 = evlua.Timer.new(
+   local timer2 = ev.Timer.new(
       function(loop, timer)
          timer2_count = timer2_count + 1
          ok(timer2_count == 1, 'once and only once')
@@ -42,7 +42,7 @@ function test_daemon_true()
 
    loop:loop()
 
-   local timer3 = evlua.Timer.new(
+   local timer3 = ev.Timer.new(
       function(loop, timer)
          ok(false, 'Should never be called!')
       end, 0.5)
@@ -59,7 +59,7 @@ end
 -- Test stop(), start(), and is_active()
 function test_start_stop_active()
    local timer1_count = 0
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function(loop, timer)
          timer1_count = timer1_count + 1
          ok(timer1_count == 1, 'once and only once')
@@ -83,7 +83,7 @@ end
 -- Test invoke()
 function test_callback()
    local timer1_count1 = 0
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function()
          timer1_count1 = timer1_count1 + 1
          ok(timer1_count1 == 1, 'once and only once A')
@@ -112,7 +112,7 @@ function test_is_pending()
    local num_pending = 0
    local num_called  = 0
    local timer2
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function(loop, timer)
          if ( timer2:is_pending() ) then
             num_pending = num_pending + 1
@@ -123,7 +123,7 @@ function test_is_pending()
    timer1:start(loop)
 
    local timer2_count = 0
-   timer2 = evlua.Timer.new(
+   timer2 = ev.Timer.new(
       function(loop, timer)
          if ( timer1:is_pending() ) then
             num_pending = num_pending + 1
@@ -143,7 +143,7 @@ end
 function test_clear_pending()
    local num_called = 0
    local timer2
-   local timer1 = evlua.Timer.new(
+   local timer1 = ev.Timer.new(
       function(loop, timer)
          if ( timer2:is_pending() ) then
             timer2:clear_pending(loop)
@@ -154,7 +154,7 @@ function test_clear_pending()
    timer1:start(loop)
 
    local timer2_count = 0
-   timer2 = evlua.Timer.new(
+   timer2 = ev.Timer.new(
       function(loop, timer)
          if ( timer1:is_pending() ) then
             timer1:clear_pending(loop)
