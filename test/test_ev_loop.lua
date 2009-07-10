@@ -1,7 +1,7 @@
 
 local tap   = require("tap")
-local ev = require("ev")
-local help  = require("test_help")
+local ev    = require("ev")
+local help  = require("help")
 local ok    = tap.ok
 
 local noleaks = help.collect_and_assert_no_watchers

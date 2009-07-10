@@ -1,7 +1,7 @@
 #!lua
 
---- EvLua exposes libev functionality to lua.
-module "evlua"
+--- Lua Ev exposes libev functionality to lua.
+module "ev"
 
 --- The version of libev in use as a floating point.
 -- @return floating point version number.

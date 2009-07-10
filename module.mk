@@ -4,7 +4,7 @@ include $(make-common.dir)/tool/cc.mk
 include $(make-common.dir)/tool/lua.mk
 include $(make-common.dir)/layout.mk
 
-_lib  := $(lua.lib.dir)/ev.so
+_lib  := $(lua.c.lib.dir)/ev.so
 _objs := $(call cc.c.to.o,$(addprefix $(_pwd)/, \
     lua_ev.c \
     lua_ev_io.c \
@@ -24,9 +24,9 @@ $(_lib): $(_objs)
 test: | lua_ev.test
 
 lua ?= lua
-lua_ev.test: | $(lua.lib.dir)/ev.so
-lua_ev.test: lua.path += $(_pwd)
-lua_ev.test: $(wildcard $(_pwd)/test*)
+lua_ev.test: | $(lua.c.lib.dir)/ev.so
+lua_ev.test: lua.path += $(_pwd)/test
+lua_ev.test: $(wildcard $(_pwd)/test/test_*.lua)
 	@mkdir -p $(tmp.dir)
 	cd $(tmp.dir); for t in $(filter-out %_help.lua,$^); do \
 		echo "TESTING: $$t"; \

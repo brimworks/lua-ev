@@ -2,7 +2,7 @@ print '1..17'
 
 local tap   = require("tap")
 local ev = require("ev")
-local help  = require("test_help")
+local help  = require("help")
 local dump  = require("dumper").dump
 local ok    = tap.ok
 

@@ -18,7 +18,7 @@ EVLUA:
     timeout to be created, and your thread continues after the timeout
     event occurs.  To the person writing the code, this appears as
     though we "slept", but other threads still got the opportunity to
-    run.
+    run. (VAPOR-WARE)
 
 IMPLEMENTATION NOTES:
 
