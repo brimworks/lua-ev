@@ -1,24 +1,45 @@
+**********************************************************************
+* Author  : Brian Maher <maherb at brimworks dot com>
+* Library : lua-ev - Lua 5.1 interface to libev
+*
+* The MIT License
+* 
+* Copyright (c) 2009 Brian Maher
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+**********************************************************************
+
+To use this library, you need libev, get it here:
+     http://dist.schmorp.de/libev/
+     http://software.schmorp.de/pkg/libev.html
+
 ======================================================================
-This is unstable code!  If you code to this interface there is a
+NOTE: This is unstable code!  If you code to this interface there is a
 possibility that future versions of this library will not be backwards
 compatible.
 ======================================================================
 
 EVLUA:
 
-  A library for wrapping lua with the libev event loop.  libev can be
-  used with lua in one of two ways:
-
-  * Directly code against libev by creating event loops and watchers
-    in the event loop.
-
-  * Special evlua interpreter and use coroutine.yield() to yield
-    control back to the event loop.  For example, if you want to
-    "sleep", you could yield() to the event loop which then causes a
-    timeout to be created, and your thread continues after the timeout
-    event occurs.  To the person writing the code, this appears as
-    though we "slept", but other threads still got the opportunity to
-    run. (VAPOR-WARE)
+  A library for wrapping lua with the libev event loop.  Currently it
+  is a simple thin wrapper over libev for creating event loops and
+  watchers.
 
 IMPLEMENTATION NOTES:
 
@@ -26,7 +47,7 @@ IMPLEMENTATION NOTES:
     items are registered in a weak table and the C structures index
     into this registry so we can go from C struct -> Lua userdata.
     Any Lua state for the userdata is tracked in the fenv of the user
-    data.
+    data so that GC works properly.
 
   * The callbacks registered always assume the loop userdata is at the
     top of the Lua stack.  This means that you should only call
@@ -37,6 +58,8 @@ TODO LIST:
 
 These are things that I would like to see done before this code can be
 considered "stable":
+
+ * Use the more standard cmake build system. (high priority)
 
  * When executing callback if we have an error handle OOM possible
    exception. (low priority)
