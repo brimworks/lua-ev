@@ -29,77 +29,249 @@ To use this library, you need libev, get it here:
      http://dist.schmorp.de/libev/
      http://software.schmorp.de/pkg/libev.html
 
-======================================================================
-NOTE: This is unstable code!  If you code to this interface there is a
-possibility that future versions of this library will not be backwards
-compatible.
-======================================================================
+To build this library, you need CMake, get it here:
+    http://www.cmake.org/cmake/resources/software.html
 
-EVLUA:
+Loading the library:
 
-  A library for wrapping lua with the libev event loop.  Currently it
-  is a simple thin wrapper over libev for creating event loops and
-  watchers.
+    If you built the library as a loadable package
+        [local] ev = require 'ev'
 
-IMPLEMENTATION NOTES:
+    If you compiled the package statically into your application, call
+    the function "luaopen_ev(L)". It will create a table with the ev
+    functions and leave it on the stack.
 
-  * All objects are allocated via lua_newuserdata(), all user data
-    items are registered in a weak table and the C structures index
-    into this registry so we can go from C struct -> Lua userdata.
-    Any Lua state for the userdata is tracked in the fenv of the user
-    data so that GC works properly.
+IMPORTANT IMPLEMENTATION NOTE:
 
-  * The callbacks registered always assume the loop userdata is at the
-    top of the Lua stack.  This means that you should only call
-    ev_loop from Lua (perhaps we can remove this limitation in the
-    future?)
+    Currently all callbacks registered by this implementation
+    rely on a thread-local in order to get the current lua_State.
+    This means any call in other C code directly to the ev_loop() C
+    API function call may cause fatal errors.  If you have ideas on
+    how to lift this restriction, please let the maintainer know!
 
-TODO LIST:
+-- ev functions --
 
-These are things that I would like to see done before this code can be
-considered "stable":
+major, minor = ev.version()
 
- * Use the more standard cmake build system. (high priority)
+    returns numeric ev version for the major and minor
+    levels of the version dynamically linked in.
 
- * When executing callback if we have an error handle OOM possible
-   exception. (low priority)
+loop = ev.Loop.new()
 
- * If a callback fails we should do something other than
-   fprintf(stderr).  Not sure what yet (make it so you can set an
-   error handler?)
+    Create a new non-default event loop.  See ev.Loop object methods
+    below.
 
- * When the loop terminates should we clean-up "daemon" watchers?
+loop = ev.Loop.default()
 
- * Create 'elua' (event-lua) which:
+    Get the default event loop.  See ev.Loop object methods below.
 
-   - Creates a coroutine "the main thread" that starts the program.
+timer = ev.Timer.new(on_timeout, after_seconds [, repeat_seconds])
 
-   - Registers a function that resume(s) that coroutine via an "idle"
-     watcher.
+    Create a new timer that will call the on_timeout function when the
+    timer expires.  The timer initially expires in after_seconds
+    (floating point), then it will expire in repeat_seconds (floating
+    point) over and over again (unless repeat_seconds is zero or is
+    omitted in which case, this timer will only fire once).
 
-   - Start the event loop (which triggers our only "idle" watcher).
+    The returned timer is an ev.Timer object.  See below for the
+    methods on this object.
 
-   - coroutine.yield("watcher", WATCHER) will register WATCHER so that
-     it resumes the coroutine we just ran after WATCHER is triggered.
+    NOTE: You must explicitly register the timer with an event loop in
+    order for it to take effect.
 
-   - coroutine.yield() registers an idle watcher that resumes the
-     current coroutine when we are idle, we need to make sure that
-     idle watchers are ran in LRU order.
+    The on_timeout function will be called with these arguments
+    (return values are ignored):
 
-   - coroutine.yield("thread", COROUTINE, "daemon") registers idle
-     watchers for the coroutine, optionally making this a "daemon
-     thread" which means that the program will exit even if this
-     daemon thread has not ran to completion.  The current coroutine
-     is then immediately resumed.  New threads are given "higher
-     priority" in their idle watchers.
+    on_timeout(loop, timer, revents)
 
-   - coroutine.yield("join", COROUTINE, COROUTINE, ...) registers "on
-     exit" handler that resumes the current coroutine when all the
-     specified coroutines have "exited" (are no longer running).
+        The loop is the event loop for which the timer is registered,
+        the timer is the ev.Timer object, and revents is a bit set
+        consisting of ev.READ and/or ev.WRITE and/or ev.TIMEOUT
+        depending on which event triggered this callback.  Normally it
+        is just ev.TIMEOUT since that is the event you are watching.
 
-   - All I/O operations are done on non-blocking file-handles, and
-     will yield until the appropriate WATCHER is triggered (simply
-     implemented by using coroutine.yield("watcher", WATCHER)).
+    See also ev_timer_init() C function.
 
-   - The callbacks are all instrumented so you can easily figure out
-     what segment of code is executing for to long of a time.
+io = ev.IO.new(on_io, file_descriptor, revents)
+
+    Create a new io watcher that will call the on_io function when the
+    specified file_descriptor is available for read and/or write
+    depending on the revents.  The revents parameter must be either
+    ev.READ, ev.WRITE, or the bitwise or of ev.READ and ev.WRITE (use
+    bitlib to do bitwise or).
+
+    The returned io is an ev.IO object.  See below for the methods on
+    this object.
+
+    NOTE: You must explicitly register the timer with an event loop in
+    order for it to take effect.
+
+    The on_io function will be called with these arguments (return
+    values are ignored):
+
+    on_io(loop, io, revents)
+
+        The loop is the event loop for which the io object is
+        registered, the io parameter is the ev.IO object, and revents
+        is a bit set consisting of ev.READ and/or ev.WRITE and/or
+        ev.TIMEOUT depending on which event triggered this callback.
+        Of course ev.TIMEOUT won't be in that set since this is the io
+        watcher.
+
+    See also ev_io_init() C function.
+
+ev.READ (constant)
+
+    If this bit is set, the io watcher is ready to read.  See also
+    EV_READ C definition.
+
+ev.WRITE (constant)
+
+    If this bit is set, the io watcher is ready to write.  See also
+    EV_WRITE C definition.
+
+ev.TIMEOUT (constant)
+
+    If this bit is set, the watcher was triggerd by a timeout. See
+    also EV_TIMEOUT C definition.
+
+-- ev.Loop object methods --
+
+loop:loop()
+
+    Run the event loop!  Returns when there are no more watchers
+    registered with the event loop.
+
+    See also ev_loop() C function.
+
+bool = loop:is_default()
+
+    Returns true if the referenced loop object is the default event
+    loop.
+
+    See also ev_is_default_loop() C function.
+
+count = loop:count()
+
+    Returns the number of loop iterations.
+
+    See also ev_loop_count() C function.
+
+epochs = loop:now()
+
+    Returns the non-integer epoch seconds time at which the current
+    iteration of the event loop woke up.
+
+    See also ev_now() C function.
+
+epochs = loop:update_now()
+
+    Updates the current time returned by loop.now(), and returns that
+    timestamp.
+
+    See also ev_now_update() C function.
+
+loop:unloop()
+
+    Process all outstanding events in the event loop, but do not make
+    another iteration of the event loop.
+
+    See also ev_unloop() C function.
+
+-- ev.Timer object methods --
+
+timer:start(loop [, is_daemon])
+
+    Start the timer in the specified event loop.  Optionally make this
+    watcher a "daemon" watcher which means that the event loop will
+    terminate even if this watcher has not triggered.
+
+    See also ev_timer_start() C function (document as ev_TYPE_start()).
+
+timer:stop(loop)
+
+    Unregister this timer from the specified event loop.  Ensures that
+    the watcher is neither active nor pending.
+
+    See also ev_timer_stop() C function (document as ev_TYPE_stop()).
+
+timer:again(loop [, seconds])
+
+    Reset the timer so that it doesn't trigger again in the specified
+    loop until the specified number of seconds from now have elapsed.
+    If seconds is not specified, uses the repeat_seconds specified
+    when the timer was created.
+
+    See also ev_timer_again() C function.
+
+bool = timer:is_active()
+
+    Returns true if the watcher is active (has been start()ed, but not
+    stop()ed).
+
+    See also ev_is_active() C function.
+
+bool = timer:is_pending()
+
+    Returns true if the watcher is pending (it has outstanding events
+    but its callback has not yet been invoked).
+
+    See also ev_is_pending() C function.
+
+revents = timer:clear_pending()
+
+    If the watcher is pending, return the revents of the pending
+    event, otherwise returns zero.  If the event was pending, the
+    pending flag is cleared (and therefore this watcher event will not
+    trigger the events callback).
+
+    See also ev_clear_pending() C function.
+
+on_timeout = timer:callback()
+
+    Get access to the callback function associated with this timer.
+
+-- ev.IO object methods --
+
+io:start(loop [, is_daemon])
+
+    Start the io in the specified event loop.  Optionally make this
+    watcher a "daemon" watcher which means that the event loop will
+    terminate even if this watcher has not triggered.
+
+    See also ev_io_start() C function (document as ev_TYPE_start()).
+
+io:stop(loop)
+
+    Unregister this io from the specified event loop.  Ensures that
+    the watcher is neither active nor pending.
+
+    See also ev_io_stop() C function (document as ev_TYPE_stop()).
+
+bool = io:is_active()
+
+    Returns true if the watcher is active (has been start()ed, but not
+    stop()ed).
+
+    See also ev_is_active() C function.
+
+bool = io:is_pending()
+
+    Returns true if the watcher is pending (it has outstanding events
+    but its callback has not yet been invoked).
+
+    See also ev_is_pending() C function.
+
+revents = io:clear_pending()
+
+    If the watcher is pending, return the revents of the pending
+    event, otherwise returns zero.  If the event was pending, the
+    pending flag is cleared (and therefore this watcher event will not
+    trigger the events callback).
+
+    See also ev_clear_pending() C function.
+
+on_timeout = io:callback()
+
+    Get access to the callback function associated with this io.
+

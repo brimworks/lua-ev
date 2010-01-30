@@ -1,3 +1,7 @@
+local src_dir, build_dir = ...
+package.path  = src_dir .. "?.lua;" .. package.path
+package.cpath = build_dir .. "?.so;" .. package.cpath
+
 -- This test relies on socket support:
 local has_socket, socket = pcall(require, "socket")
 if not has_socket then
