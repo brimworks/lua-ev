@@ -34,10 +34,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
   INCLUDE_DIRECTORIES(${LIBEV_INCLUDE_DIR} ${LUA_INCLUDE_DIR} ${PTHREADS_INCLUDE_DIR})
   ADD_LIBRARY(cmod_ev MODULE
     lua_ev.c
-    lua_ev_io.c
-    lua_ev_loop.c
-    lua_ev_timer.c
-    lua_ev_shared.c
+    shared_lua_ev.c
     )
   SET_TARGET_PROPERTIES(cmod_ev PROPERTIES PREFIX "")
   SET_TARGET_PROPERTIES(cmod_ev PROPERTIES OUTPUT_NAME ev)
