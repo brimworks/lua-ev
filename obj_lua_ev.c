@@ -51,7 +51,10 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
 
     obj = lua_newuserdata(L, size);
     luaL_getmetatable(L,     tname);
-    lua_setmetatable(L,      -2);
+
+    assert(lua_istable(L, -1) /* tname was loaded */);
+
+    lua_setmetatable(L, -2);
 
     return obj;
 }
@@ -63,6 +66,8 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
  * [-0, +0, ?]
  */
 static void register_obj(lua_State*L, int obj_i, void* obj) {
+    obj_i = abs_index(L, obj_i);
+
     lua_pushlightuserdata(L, &obj_registry);
     lua_rawget(L,            LUA_REGISTRYINDEX);
     assert(lua_istable(L, -1) /* create_obj_registry() should have ran */);
@@ -91,8 +96,9 @@ static int push_obj(lua_State* L, void* obj) {
 static int push_objs(lua_State* L, void** objs) {
     int obj_count = 0;
     int registry_i;
+    void** cur;
 
-    for ( void** cur=objs; *cur; ++cur ) obj_count++;
+    for ( cur=objs; *cur; ++cur ) obj_count++;
 
     if ( 0 == obj_count ) return obj_count;
 
@@ -103,8 +109,8 @@ static int push_objs(lua_State* L, void** objs) {
     assert(lua_istable(L, -1) /* create_obj_registry() should have ran */);
 
     registry_i = lua_gettop(L);
-    for ( ; *objs; ++objs ) {
-        lua_pushlightuserdata(L, *objs);
+    for ( cur=objs; *cur; ++cur ) {
+        lua_pushlightuserdata(L, *cur);
         lua_rawget(L, registry_i);
     }
 

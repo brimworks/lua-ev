@@ -32,7 +32,8 @@ static int create_timer_mt(lua_State *L) {
         { "callback",      timer_callback },
         { NULL, NULL }
     };
-    luaL_register(L, TIMER_MT, fns);
+    luaL_newmetatable(L, TIMER_MT);
+    luaL_register(L, NULL, fns);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
@@ -190,7 +191,7 @@ static int timer_clear_pending(lua_State *L) {
     struct ev_loop* loop   = *check_loop_and_init(L, 2);
 
     int revents = ev_clear_pending(loop, timer);
-    if ( ! loop->repeat           &&
+    if ( ! timer->repeat           &&
          ( revents & EV_TIMEOUT ) )
     {
         loop_stop_watcher(L, 2, 1);

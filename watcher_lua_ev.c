@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 /**
  * Implement the new function on all the watcher objects.  The first
  * element on the stack must be the callback function.
@@ -5,14 +7,17 @@
  * [+1, -0, ?]
  */
 static void* watcher_new(lua_State* L, size_t size, const char* lua_type, int data_offset) {
-    char* obj;
-    int   result;
+    void*  obj;
+    int    result;
+    void** data;
 
     luaL_checktype(L, 1, LUA_TFUNCTION);
 
-    obj = (char*)obj_new(L, size, lua_type);
-    (void*)(obj + data_offset) = L;
+    obj = obj_new(L, size, lua_type);
     register_obj(L, -1, obj);
+
+    *(void**)((uint8_t*)obj + data_offset) = L;
+
 
     lua_createtable(L, 1, 0);
     lua_pushvalue(L, 1);
@@ -57,7 +62,7 @@ static void watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, i
     }
 
     lua_getfenv(L, -1);
-    assert(!lua_isnil(L, -1) /* The watcher fenv was found */);
+    assert(lua_istable(L, -1) /* The watcher fenv was found */);
     lua_rawgeti(L, -1, WATCHER_FN);
     if ( lua_isnil(L, -1) ) {
         /* The watcher function was set to nil, so do nothing */

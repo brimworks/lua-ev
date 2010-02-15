@@ -35,7 +35,8 @@ static int create_loop_mt(lua_State *L) {
         { "__gc",       loop_delete },
         { NULL, NULL }
     };
-    luaL_register(L, LOOP_MT, fns);
+    luaL_newmetatable(L, LOOP_MT);
+    luaL_register(L, NULL, fns);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
@@ -72,10 +73,12 @@ static struct ev_loop** loop_alloc(lua_State *L) {
 static struct ev_loop** check_loop_and_init(lua_State *L, int loop_i) {
     struct ev_loop** loop_r = check_loop(L, loop_i);
     if ( UNINITIALIZED_DEFAULT_LOOP == *loop_r ) {
-        *loop_r = ev_default_loop(EVFLAG_AUTO) ||
+        *loop_r = ev_default_loop(EVFLAG_AUTO);
+        if ( NULL == *loop_r ) {
             luaL_error(L,
                        "libev init failed, perhaps LIBEV_FLAGS environment variable "
                        " is causing it to select a bad backend?");
+        }
         register_obj(L, loop_i, *loop_r);
     }
     return loop_r;
@@ -89,7 +92,9 @@ static struct ev_loop** check_loop_and_init(lua_State *L, int loop_i) {
  * [-0, +1, ?]
  */
 static int loop_new(lua_State *L) {
-    *(loop_alloc(L)) = ev_loop_new(EVFLAG_AUTO);
+    struct ev_loop** loop_r = loop_alloc(L);
+    *loop_r = ev_loop_new(EVFLAG_AUTO);
+    register_obj(L, -1, *loop_r);
     return 1;
 }
 
@@ -121,8 +126,8 @@ static int loop_delete(lua_State *L) {
 static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_daemon) {
     int current_is_daemon = -1;
 
-    loop_i    = abs_index(loop_i);
-    watcher_i = abs_index(watcher_i);
+    loop_i    = abs_index(L, loop_i);
+    watcher_i = abs_index(L, watcher_i);
 
     /* Check that watcher isn't already registered: */
     lua_getfenv(L,     loop_i);
@@ -165,14 +170,15 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
  * [-0, +0, m]
  */
 static void loop_stop_watcher(lua_State* L, int loop_i, int watcher_i) {
-    loop_i    = abs_index(loop_i);
-    watcher_i = abs_index(watcher_i);
+    loop_i    = abs_index(L, loop_i);
+    watcher_i = abs_index(L, watcher_i);
 
     lua_getfenv(L,     loop_i);
     lua_pushvalue(L,   watcher_i);
     lua_rawget(L,      -2);
 
     if ( lua_toboolean(L, -1) ) ev_ref(*check_loop_and_init(L, loop_i));
+    lua_pop(L, 1);
 
     lua_pushvalue(L,   watcher_i);
     lua_pushnil(L);

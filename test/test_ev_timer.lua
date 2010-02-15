@@ -20,7 +20,6 @@ function test_basic()
          ok(true, 'one second timer')
       end,
       1)
-
    timer1:start(loop)
    loop:loop()
 end

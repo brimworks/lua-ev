@@ -31,7 +31,8 @@ static int create_io_mt(lua_State *L) {
         { "callback",      io_callback },
         { NULL, NULL }
     };
-    luaL_register(L, IO_MT, fns);
+    luaL_newmetatable(L, IO_MT);
+    luaL_register(L, NULL, fns);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
@@ -142,8 +143,8 @@ static int io_is_pending(lua_State *L) {
  *
  * [+1, -0, e]
  */
-static int timer_clear_pending(lua_State *L) {
-    lua_pushnumber(L, ev_clear_pending(*check_loop_and_init(L, 2), check_timer(L, 1)));
+static int io_clear_pending(lua_State *L) {
+    lua_pushnumber(L, ev_clear_pending(*check_loop_and_init(L, 2), check_io(L, 1)));
     return 1;
 }
 

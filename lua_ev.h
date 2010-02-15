@@ -18,7 +18,7 @@
  * so we can defer initializing the default loop for as long as
  * possible.
  */
-#define UNINITIALIZED_DEFAULT_LOOP 1
+#define UNINITIALIZED_DEFAULT_LOOP (struct ev_loop*)1
 
 /**
  * The location in the fenv of the watcher that contains the callback
@@ -110,3 +110,18 @@ static int               timer_is_active(lua_State *L);
 static int               timer_is_pending(lua_State *L);
 static int               timer_clear_pending(lua_State *L);
 static int               timer_callback(lua_State *L);
+
+/**
+ * IO functions:
+ */
+static int               luaopen_ev_io(lua_State *L);
+static int               create_io_mt(lua_State *L);
+static int               io_new(lua_State* L);
+static void              io_cb(struct ev_loop* loop, ev_io* io, int revents);
+static int               io_again(lua_State *L);
+static int               io_stop(lua_State *L);
+static int               io_start(lua_State *L);
+static int               io_is_active(lua_State *L);
+static int               io_is_pending(lua_State *L);
+static int               io_clear_pending(lua_State *L);
+static int               io_callback(lua_State *L);
