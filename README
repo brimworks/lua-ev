@@ -4,7 +4,7 @@
 *
 * The MIT License
 * 
-* Copyright (c) 2009 Brian Maher
+* Copyright (c) 2009-1010 Brian Maher
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -40,14 +40,6 @@ Loading the library:
     If you compiled the package statically into your application, call
     the function "luaopen_ev(L)". It will create a table with the ev
     functions and leave it on the stack.
-
-IMPORTANT IMPLEMENTATION NOTE:
-
-    Currently all callbacks registered by this implementation
-    rely on a thread-local in order to get the current lua_State.
-    This means any call in other C code directly to the ev_loop() C
-    API function call may cause fatal errors.  If you have ideas on
-    how to lift this restriction, please let the maintainer know!
 
 -- ev functions --
 
@@ -227,9 +219,10 @@ revents = timer:clear_pending()
 
     See also ev_clear_pending() C function.
 
-on_timeout = timer:callback()
+old_on_timeout = timer:callback([new_on_timeout])
 
-    Get access to the callback function associated with this timer.
+    Get access to the callback function associated with this timer,
+    optionally setting a new callback function.
 
 -- ev.IO object methods --
 
@@ -273,5 +266,31 @@ revents = io:clear_pending()
 
 on_timeout = io:callback()
 
-    Get access to the callback function associated with this io.
+    Get access to the callback function associated with this timer,
+    optionally setting a new callback function.
 
+EXCEPTION HANDLING NOTE:
+
+   If there is an exception when calling a watcher callback, the error
+   will be printed to stderr.  In the future, it would be cool if
+   there was a linked list of error handlers, and that if a callback
+   registers another callback, this linked list of error handlers
+   would be inherited so that exception handling can be done more
+   easily.  To do this, we just need to add a method for adding an
+   error handler for the current callback context, and keep calling
+   the error handlers in the linked list until an error handler
+   actually handles the exception.  If the error handling stack
+   unwinds, we will probably just resort to printing to stderr.
+
+IMPROVEMENT NOTE:
+
+   You can now call ev_loop() directly from the C API (in the past
+   there was assumptions in the callback implementation).
+
+TODO:
+
+  * Make the pthread library optional (currently we just register the
+    libev ev_default_fork function via pthread_atfork).
+
+  * Add support for other watcher types (signals, stat, periodic,
+    child, idle, embed, async, etc).

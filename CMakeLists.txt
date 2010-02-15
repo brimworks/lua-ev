@@ -1,3 +1,4 @@
+# This cmake file was inspired by:
 # Copyright (C) 2007-2009 LuaDist.
 # Submitted by David Manura
 # Redistribution and use of this file is allowed according to the
