@@ -6,7 +6,7 @@ package.cpath = build_dir .. "?.so;" .. package.cpath
 local has_socket, socket = pcall(require, "socket")
 if not has_socket then
    print '1..0'
-   print '# No socket library available'
+   print('# No socket library available (' .. socket .. ')')
    os.exit(0)
 end
 print '1..??'
@@ -55,17 +55,17 @@ local function test_echo()
           try:finally(function() server:close() end)
           server:settimeout(0)
           ev.IO.new(
-             function(loop, timer)
-                timer:stop(loop)
+             function(loop, watcher)
+                watcher:stop(loop)
                 local client = assert(server:accept())
                 client:settimeout(0)
                 ev.IO.new(
-                   function(loop, timer)
-                      timer:stop(loop)
+                   function(loop, watcher)
+                      watcher:stop(loop)
                       local buff = assert(client:receive('*a'))
                       ev.IO.new(
-                         function(loop, timer)
-                            timer:stop(loop)
+                         function(loop, watcher)
+                            watcher:stop(loop)
                             assert(client:send(buff))
                             assert(client:shutdown("send"))
                          end,
@@ -82,14 +82,14 @@ local function test_echo()
           try:finally(function() client:close() end)
           client:settimeout(0)
           ev.IO.new(
-             function(loop, timer)
-                timer:stop(loop)
+             function(loop, watcher)
+                watcher:stop(loop)
                 local str = "Hello World"
                 assert(client:send(str))
                 assert(client:shutdown("send"))
                 ev.IO.new(
-                   function(loop, timer)
-                      timer:stop(loop)
+                   function(loop, watcher)
+                      watcher:stop(loop)
                       local response = assert(client:receive("*a"))
                       ok(response == str,
                          tostring(response) .. " == " .. tostring(str))
