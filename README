@@ -41,6 +41,19 @@ Loading the library:
     the function "luaopen_ev(L)". It will create a table with the ev
     functions and leave it on the stack.
 
+Choosing a backend:
+
+    Set the LIBEV_FLAGS= environment variable to choose a backend:
+
+    1 - select()
+    2 - poll()
+    4 - epoll()
+    8 - kqueue
+    16 - /dev/poll [not implemented]
+    32 - Solaris port
+
+    Please see the documentation for libev for more details.
+
 -- ev functions --
 
 major, minor = ev.version()
@@ -53,9 +66,10 @@ loop = ev.Loop.new()
     Create a new non-default event loop.  See ev.Loop object methods
     below.
 
-loop = ev.Loop.default()
+loop = ev.Loop.default
 
-    Get the default event loop.  See ev.Loop object methods below.
+    The "default" event loop.  See ev.Loop object methods below.
+    Note that the default loop is "lazy loaded".
 
 timer = ev.Timer.new(on_timeout, after_seconds [, repeat_seconds])
 
@@ -169,6 +183,14 @@ loop:unloop()
     another iteration of the event loop.
 
     See also ev_unloop() C function.
+
+backend_id = loop:backend()
+
+    Returns the identifier of the current backend which is being used
+    by this event loop.  See the libev documentation for what each
+    number means:
+
+    http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#FUNCTIONS_CONTROLLING_THE_EVENT_LOOP
 
 -- ev.Timer object methods --
 

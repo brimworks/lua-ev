@@ -32,6 +32,7 @@ static int create_loop_mt(lua_State *L) {
         { "update_now", loop_update_now },
         { "loop",       loop_loop },
         { "unloop",     loop_unloop },
+        { "backend",    loop_backend },
         { "__gc",       loop_delete },
         { NULL, NULL }
     };
@@ -93,8 +94,14 @@ static struct ev_loop** check_loop_and_init(lua_State *L, int loop_i) {
  */
 static int loop_new(lua_State *L) {
     struct ev_loop** loop_r = loop_alloc(L);
-    *loop_r = ev_loop_new(EVFLAG_AUTO);
+
+    unsigned int flags = lua_isnumber(L, 1) ?
+        lua_tointeger(L, 1) : EVFLAG_AUTO;
+
+    *loop_r = ev_loop_new(flags);
+
     register_obj(L, -1, *loop_r);
+
     return 1;
 }
 
@@ -243,3 +250,12 @@ static int loop_unloop(lua_State *L) {
     return 0;
 }
 
+/**
+ * Determine which backend is implementing the event loop.
+ *
+ * [-0, +1, m]
+ */
+static int loop_backend(lua_State *L) {
+    lua_pushinteger(L, ev_backend(*check_loop_and_init(L, 1)));
+    return 1;
+}

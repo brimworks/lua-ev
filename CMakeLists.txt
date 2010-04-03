@@ -47,6 +47,11 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
   ADD_TEST(ev_io ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_io.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_loop ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_loop.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_timer ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_timer.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
+  SET_TESTS_PROPERTIES(ev_io ev_loop ev_timer
+                       PROPERTIES
+                       FAIL_REGULAR_EXPRESSION
+                       "not ok")
+
 # / test ev.so
 
 # Where to install stuff
