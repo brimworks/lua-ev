@@ -6,7 +6,7 @@ package.cpath = build_dir .. "?.so;" .. package.cpath
 local has_socket, socket = pcall(require, "socket")
 if not has_socket then
    print '1..0'
-   print('# No socket library available (' .. socket .. ')')
+   print('# SKIP: No socket library available (' .. socket .. ')')
    os.exit(0)
 end
 print '1..??'
@@ -35,7 +35,7 @@ local function newtry()
    setmetatable(try, try)
    function try:__call(body)
       local is_err, err = pcall(body)
-      for finalizer in ipairs(self) do
+      for _, finalizer in ipairs(self) do
          -- ignore errors in finalizers:
          pcall(finalizer)
       end
