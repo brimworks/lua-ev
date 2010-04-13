@@ -91,12 +91,31 @@ timer = ev.Timer.new(on_timeout, after_seconds [, repeat_seconds])
     on_timeout(loop, timer, revents)
 
         The loop is the event loop for which the timer is registered,
-        the timer is the ev.Timer object, and revents is a bit set
-        consisting of ev.READ and/or ev.WRITE and/or ev.TIMEOUT
-        depending on which event triggered this callback.  Normally it
-        is just ev.TIMEOUT since that is the event you are watching.
+        the timer is the ev.Timer object, and revents is ev.TIMEOUT.
 
     See also ev_timer_init() C function.
+
+sig = ev.Signal.new(on_signal, signal_number)
+
+    Create a new signal watcher that will call the on_signal function
+    when the specified signal_number is delivered.
+
+    The returned sig is an ev.Signal object.  See below for the methods on
+    this object.
+
+    NOTE: You must explicitly register the sig with an event loop in
+    order for it to take effect.
+
+    The on_signal function will be called with these arguments (return
+    values are ignored):
+
+    on_signal(loop, sig, revents)
+
+        The loop is the event loop for which the io object is
+        registered, the sig parameter is the ev.Signal object, and
+        revents is ev.SIGNAL.
+
+    See also ev_signal_init() C function.
 
 io = ev.IO.new(on_io, file_descriptor, revents)
 
@@ -109,7 +128,7 @@ io = ev.IO.new(on_io, file_descriptor, revents)
     The returned io is an ev.IO object.  See below for the methods on
     this object.
 
-    NOTE: You must explicitly register the timer with an event loop in
+    NOTE: You must explicitly register the io with an event loop in
     order for it to take effect.
 
     The on_io function will be called with these arguments (return
@@ -138,8 +157,13 @@ ev.WRITE (constant)
 
 ev.TIMEOUT (constant)
 
-    If this bit is set, the watcher was triggerd by a timeout. See
+    If this bit is set, the watcher was triggered by a timeout. See
     also EV_TIMEOUT C definition.
+
+ev.SIGNAL (constant)
+
+   If this bit is set, the watcher was triggered by a signal.  See
+   also EV_SIGNAL C definition.
 
 -- ev.Loop object methods --
 

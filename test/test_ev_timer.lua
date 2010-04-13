@@ -16,8 +16,9 @@ local loop = ev.Loop.default
 -- Simply see if we can do a simple one second timer:
 function test_basic() 
    local timer1 = ev.Timer.new(
-      function(loop, timer)
+      function(loop, timer, revents)
          ok(true, 'one second timer')
+         ok(ev.TIMEOUT == revents, 'ev.TIMEOUT(' .. ev.TIMEOUT .. ') == revents (' .. revents .. ')')
       end,
       0.01)
    timer1:start(loop)

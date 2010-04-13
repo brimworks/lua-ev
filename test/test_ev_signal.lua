@@ -16,8 +16,9 @@ local loop    = ev.Loop.default
 -- Simply see if we can do a simple signal handler:
 function test_basic() 
    local sig = ev.Signal.new(
-      function(loop, sig)
+      function(loop, sig, revents)
          ok(true, 'got SIGALRM')
+         ok(ev.SIGNAL == revents, 'ev.SIGNAL(' .. ev.SIGNAL .. ') == revents (' .. revents .. ')')
          sig:stop(loop)
       end,
       14) -- SIGALRM

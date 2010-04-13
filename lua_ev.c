@@ -61,6 +61,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     lua_pushnumber(L, EV_TIMEOUT);
     lua_setfield(L, -2, "TIMEOUT");
 
+    lua_pushnumber(L, EV_SIGNAL);
+    lua_setfield(L, -2, "SIGNAL");
+
     return 1;
 }
 
