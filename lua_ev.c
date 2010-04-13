@@ -13,6 +13,7 @@
 #include "watcher_lua_ev.c"
 #include "io_lua_ev.c"
 #include "timer_lua_ev.c"
+#include "signal_lua_ev.c"
 
 /**
  * Entry point into the 'ev' lua library.  Validates that the
@@ -41,6 +42,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     luaopen_ev_io(L);
     lua_setfield(L, -2, "IO");
+
+    luaopen_ev_signal(L);
+    lua_setfield(L, -2, "Signal");
 
     lua_pushcfunction(L, version);
     lua_setfield(L, -2, "version");

@@ -9,9 +9,10 @@
 /**
  * Define the names used for the metatables.
  */
-#define LOOP_MT  "ev{loop}"
-#define IO_MT    "ev{io}"
-#define TIMER_MT "ev{timer}"
+#define LOOP_MT   "ev{loop}"
+#define IO_MT     "ev{io}"
+#define TIMER_MT  "ev{timer}"
+#define SIGNAL_MT "ev{signal}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -45,6 +46,10 @@
 
 #define check_io(L, narg)                                        \
     ((struct ev_io*)       luaL_checkudata((L), (narg), IO_MT))
+
+#define check_signal(L, narg)                                   \
+    ((struct ev_signal*)   luaL_checkudata((L), (narg), SIGNAL_MT))
+
 
 /**
  * Copied from the lua source code lauxlib.c.  It simply converts a
@@ -126,3 +131,18 @@ static int               io_is_active(lua_State *L);
 static int               io_is_pending(lua_State *L);
 static int               io_clear_pending(lua_State *L);
 static int               io_callback(lua_State *L);
+
+/**
+ * Signal functions:
+ */
+static int               luaopen_ev_signal(lua_State *L);
+static int               create_signal_mt(lua_State *L);
+static int               signal_new(lua_State* L);
+static void              signal_cb(struct ev_loop* loop, ev_signal* sig, int revents);
+static int               signal_again(lua_State *L);
+static int               signal_stop(lua_State *L);
+static int               signal_start(lua_State *L);
+static int               signal_is_active(lua_State *L);
+static int               signal_is_pending(lua_State *L);
+static int               signal_clear_pending(lua_State *L);
+static int               signal_callback(lua_State *L);

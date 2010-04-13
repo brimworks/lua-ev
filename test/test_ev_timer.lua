@@ -19,7 +19,7 @@ function test_basic()
       function(loop, timer)
          ok(true, 'one second timer')
       end,
-      1)
+      0.01)
    timer1:start(loop)
    loop:loop()
 end
@@ -31,7 +31,7 @@ function test_daemon_true()
       function(loop, timer)
          timer1_count = timer1_count + 1
          ok(timer1_count == 1, 'once and only once')
-      end, 1)
+      end, 0.1)
    timer1:start(loop)
 
    local timer2_count = 0
@@ -39,7 +39,7 @@ function test_daemon_true()
       function(loop, timer)
          timer2_count = timer2_count + 1
          ok(timer2_count == 1, 'once and only once')
-      end, 0.5)
+      end, 0.01)
 
    timer2:start(loop, true)
 
@@ -48,7 +48,7 @@ function test_daemon_true()
    local timer3 = ev.Timer.new(
       function(loop, timer)
          ok(false, 'Should never be called!')
-      end, 0.5)
+      end, 0.01)
 
    timer3:start(loop, true)
 
@@ -66,7 +66,7 @@ function test_start_stop_active()
       function(loop, timer)
          timer1_count = timer1_count + 1
          ok(timer1_count == 1, 'once and only once')
-      end, 1)
+      end, 0.01)
 
    ok(not timer1:is_active(), 'not active')
 
@@ -90,7 +90,7 @@ function test_callback()
       function()
          timer1_count1 = timer1_count1 + 1
          ok(timer1_count1 == 1, 'once and only once A')
-      end, 0.5)
+      end, 0.01)
 
    -- Test calling the callback manually:
    timer1:callback()()
@@ -121,18 +121,17 @@ function test_is_pending()
             num_pending = num_pending + 1
          end
          num_called = num_called + 1
-      end, 1)
+      end, 0.01)
 
    timer1:start(loop)
 
-   local timer2_count = 0
    timer2 = ev.Timer.new(
       function(loop, timer)
          if ( timer1:is_pending() ) then
             num_pending = num_pending + 1
          end
          num_called = num_called + 1
-      end, 1)
+      end, 0.01)
 
    timer2:start(loop)
 
@@ -152,18 +151,17 @@ function test_clear_pending()
             timer2:clear_pending(loop)
          end
          num_called = num_called + 1
-      end, 1)
+      end, 0.01)
 
    timer1:start(loop)
 
-   local timer2_count = 0
    timer2 = ev.Timer.new(
       function(loop, timer)
          if ( timer1:is_pending() ) then
             timer1:clear_pending(loop)
          end
          num_called = num_called + 1
-      end, 1)
+      end, 0.01)
 
    timer2:start(loop)
 
