@@ -1,8 +1,8 @@
 package = "lua-ev"
-version = "1.0-1"
+version = "@VERSION@-1"
 
 source = {
-   url = "http://download.github.com/brimworks-lua-ev-7a4b879.tar.gz"
+   url = "http://github.com/downloads/brimworks/libev/lua-ev-@VERSION@.tar.gz"
 }
 
 description = {
