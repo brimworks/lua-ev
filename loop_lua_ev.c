@@ -81,6 +81,9 @@ static struct ev_loop** check_loop_and_init(lua_State *L, int loop_i) {
                        " is causing it to select a bad backend?");
         }
         register_obj(L, loop_i, *loop_r);
+
+        /* TODO: Only enable this if linked with pthread: */
+        pthread_atfork(0, 0, ev_default_fork);
     }
     return loop_r;
 }

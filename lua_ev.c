@@ -27,9 +27,6 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     assert(ev_version_major() == EV_VERSION_MAJOR &&
            ev_version_minor() >= EV_VERSION_MINOR);
 
-    /* TODO: Only enable this if linked with pthread: */
-    pthread_atfork(0, 0, ev_default_fork);
-
     create_obj_registry(L);
 
     lua_createtable(L, 0, 10);
