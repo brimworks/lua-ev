@@ -23,16 +23,6 @@ external_dependencies = {
       header = "ev.h",
       library = "libev.so"
    },
-   PTHREADS = {
-      header = "pthread.h",
-   },
-   platforms = {
-      linux = {
-         PTHREADS = {
-           library = "libpthread.so"
-         }
-      }
-   }
 }
 
 build = {
@@ -52,7 +42,7 @@ build = {
          modules = {
             ev = {
                libraries = {
-                  "ev", "pthread"
+                  "ev"
                }
             }
          }

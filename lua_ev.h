@@ -85,6 +85,7 @@ static int               loop_update_now(lua_State *L);
 static int               loop_loop(lua_State *L);
 static int               loop_unloop(lua_State *L);
 static int               loop_backend(lua_State *L);
+static int               loop_fork(lua_State *L);
 
 /**
  * Object functions:

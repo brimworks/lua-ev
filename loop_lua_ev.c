@@ -33,6 +33,7 @@ static int create_loop_mt(lua_State *L) {
         { "loop",       loop_loop },
         { "unloop",     loop_unloop },
         { "backend",    loop_backend },
+        { "fork",       loop_fork },
         { "__gc",       loop_delete },
         { NULL, NULL }
     };
@@ -81,9 +82,6 @@ static struct ev_loop** check_loop_and_init(lua_State *L, int loop_i) {
                        " is causing it to select a bad backend?");
         }
         register_obj(L, loop_i, *loop_r);
-
-        /* TODO: Only enable this if linked with pthread: */
-        pthread_atfork(0, 0, ev_default_fork);
     }
     return loop_r;
 }
@@ -261,4 +259,23 @@ static int loop_unloop(lua_State *L) {
 static int loop_backend(lua_State *L) {
     lua_pushinteger(L, ev_backend(*check_loop_and_init(L, 1)));
     return 1;
+}
+
+/**
+ * Make it safe to resume an event loop after the fork(2) system call.
+ *
+ * [-0, +0, m]
+ */
+static int loop_fork(lua_State *L) {
+    struct ev_loop* loop = *check_loop(L, 1);
+
+    if ( UNINITIALIZED_DEFAULT_LOOP == loop ) {
+        // Do nothing!
+    } else if ( ev_is_default_loop(loop) ) {
+        ev_default_fork();
+    } else {
+        ev_loop_fork(loop);
+    }
+
+    return 0;
 }

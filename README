@@ -54,6 +54,12 @@ Choosing a backend:
 
     Please see the documentation for libev for more details.
 
+WARNING:
+
+  If your program fork()s, then you will need to re-initialize
+  your event loop(s) in the child process.  You can do this
+  re-initialization using the loop:fork() function.
+
 -- ev functions --
 
 major, minor = ev.version()
@@ -166,6 +172,11 @@ ev.SIGNAL (constant)
    also EV_SIGNAL C definition.
 
 -- ev.Loop object methods --
+
+loop:fork()
+
+   You *must* call this function in the child process after fork(2)
+   system call and before the next iteration of the event loop.
 
 loop:loop()
 
