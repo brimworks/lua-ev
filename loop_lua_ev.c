@@ -27,7 +27,9 @@ static int create_loop_mt(lua_State *L) {
 
     static luaL_reg fns[] = {
         { "is_default", loop_is_default },
-        { "count",      loop_count },
+        { "count",      loop_iteration }, /* old API */
+        { "iteration",  loop_iteration },
+        { "depth",      loop_depth },
         { "now",        loop_now },
         { "update_now", loop_update_now },
         { "loop",       loop_loop },
@@ -208,11 +210,22 @@ static int loop_is_default(lua_State *L) {
 /**
  * How many times have we iterated though the event loop?
  */
-static int loop_count(lua_State *L) {
+static int loop_iteration(lua_State *L) {
     struct ev_loop* loop = *check_loop(L, 1);
     lua_pushinteger(L,
                     UNINITIALIZED_DEFAULT_LOOP == loop ?
                     0 : ev_loop_count(loop));
+    return 1;
+}
+
+/**
+ * How many times have we iterated though the event loop?
+ */
+static int loop_depth(lua_State *L) {
+    struct ev_loop* loop = *check_loop(L, 1);
+    lua_pushinteger(L,
+                    UNINITIALIZED_DEFAULT_LOOP == loop ?
+                    0 : ev_loop_depth(loop));
     return 1;
 }
 

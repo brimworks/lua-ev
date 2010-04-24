@@ -192,11 +192,20 @@ bool = loop:is_default()
 
     See also ev_is_default_loop() C function.
 
-count = loop:count()
+num = loop:iteration()
 
-    Returns the number of loop iterations.
+    Returns the number of loop iterations.  Note that this function
+    used to be called loop:count().
 
-    See also ev_loop_count() C function.
+    See also ev_iterations() C function.
+
+num = loop:depth()
+
+    Returns the number of times loop:loop() was entered minus the
+    number of times loop:loop() was exited, in other words, the
+    recursion depth.
+
+    See also ev_depth() C function.
 
 epochs = loop:now()
 

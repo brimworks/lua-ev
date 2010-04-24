@@ -9,6 +9,25 @@ local ok    = tap.ok
 
 local noleaks = help.collect_and_assert_no_watchers
 
+local num = ev.Loop.default:iteration()
+ok(num == 0,
+   "iteration=" .. num)
+
+num = ev.Loop.default:depth()
+ok(num == 0,
+   "depth=" .. depth)
+
+-- Shouldn't do anything:
+ev.Loop.default:fork()
+
+-- Do one event loop:
+ev.Loop.default:loop()
+
+-- Be sure old API still works:
+num = ev.Loop.default:count()
+ok(num == 1,
+   "iteration=" .. num)
+
 ok(type(ev.version()) == "number",
    "version=" .. tostring(ev.version()));
 
@@ -23,3 +42,5 @@ ok(ev.Loop.new(1):backend() == 1,
 
 ok(ev.Loop.new(2):backend() == 2,
    "Able to choose backend 2 (poll), fails on windows or if LIBEV_FLAGS environment variable excludes this backend")
+
+
