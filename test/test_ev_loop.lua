@@ -15,7 +15,7 @@ ok(num == 0,
 
 num = ev.Loop.default:depth()
 ok(num == 0,
-   "depth=" .. depth)
+   "depth=" .. num)
 
 -- Shouldn't do anything:
 ev.Loop.default:fork()
