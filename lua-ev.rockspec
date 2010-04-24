@@ -22,7 +22,7 @@ external_dependencies = {
    LIBEV = {
       header = "ev.h",
       library = "libev.so"
-   },
+   }
 }
 
 build = {
@@ -34,17 +34,6 @@ build = {
          },
          libraries = {
             "ev"
-         }
-      }
-   },
-   platforms = {
-      linux = {
-         modules = {
-            ev = {
-               libraries = {
-                  "ev"
-               }
-            }
          }
       }
    }
