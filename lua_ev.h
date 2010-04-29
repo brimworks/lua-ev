@@ -7,6 +7,15 @@
  */
 
 /**
+ * Compatibility defines
+ */
+#if EV_VERSION_MAJOR > 3 || (EV_VERSION_MAJOR == 3 && EV_VERISON_MINOR >= 7)
+    #define HAVE_LOOP_DEPTH 1
+#else
+    #define HAVE_LOOP_DEPTH 0
+#endif
+
+/**
  * Define the names used for the metatables.
  */
 #define LOOP_MT   "ev{loop}"

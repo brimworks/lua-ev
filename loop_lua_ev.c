@@ -29,7 +29,9 @@ static int create_loop_mt(lua_State *L) {
         { "is_default", loop_is_default },
         { "count",      loop_iteration }, /* old API */
         { "iteration",  loop_iteration },
+#if HAVE_LOOP_DEPTH
         { "depth",      loop_depth },
+#endif /* HAVE_LOOP_DEPTH */
         { "now",        loop_now },
         { "update_now", loop_update_now },
         { "loop",       loop_loop },
@@ -218,6 +220,7 @@ static int loop_iteration(lua_State *L) {
     return 1;
 }
 
+#if HAVE_LOOP_DEPTH
 /**
  * How many times have we iterated though the event loop?
  */
@@ -228,6 +231,7 @@ static int loop_depth(lua_State *L) {
                     0 : ev_loop_depth(loop));
     return 1;
 }
+#endif /* HAVE_LOOP_DEPTH */
 
 /**
  * The current event loop time.

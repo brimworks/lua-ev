@@ -199,11 +199,14 @@ num = loop:iteration()
 
     See also ev_iterations() C function.
 
-num = loop:depth()
+num = loop:depth() [libev >= 3.7]
 
     Returns the number of times loop:loop() was entered minus the
     number of times loop:loop() was exited, in other words, the
     recursion depth.
+    
+    This method is available only if lua-ev was linked 
+    with libev 3.7 and higher.
 
     See also ev_depth() C function.
 
