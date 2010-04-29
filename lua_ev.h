@@ -60,7 +60,7 @@
     ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? \
      (i) : lua_gettop(L) + (i) + 1)
 
-     
+
 /**
  * Generic functions:
  */

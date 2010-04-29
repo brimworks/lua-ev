@@ -196,7 +196,7 @@ static int timer_clear_pending(lua_State *L) {
     {
         loop_stop_watcher(L, 2, 1);
     }
-    
+
     lua_pushnumber(L, revents);
     return 1;
 }

@@ -42,5 +42,3 @@ ok(ev.Loop.new(1):backend() == 1,
 
 ok(ev.Loop.new(2):backend() == 2,
    "Able to choose backend 2 (poll), fails on windows or if LIBEV_FLAGS environment variable excludes this backend")
-
-

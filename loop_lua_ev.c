@@ -1,6 +1,6 @@
 /**
  * Create a table for ev.Loop that gives access to the constructor for
- * loop objects and the "default" event loop object instance. 
+ * loop objects and the "default" event loop object instance.
  *
  * [-0, +1, ?]
  */

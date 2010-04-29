@@ -14,7 +14,7 @@ local noleaks = help.collect_and_assert_no_watchers
 local loop = ev.Loop.default
 
 -- Simply see if we can do a simple one second timer:
-function test_basic() 
+function test_basic()
    local timer1 = ev.Timer.new(
       function(loop, timer, revents)
          ok(true, 'one second timer')

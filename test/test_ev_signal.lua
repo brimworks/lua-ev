@@ -14,7 +14,7 @@ local noleaks = help.collect_and_assert_no_watchers
 local loop    = ev.Loop.default
 
 -- Simply see if we can do a simple signal handler:
-function test_basic() 
+function test_basic()
    local sig = ev.Signal.new(
       function(loop, sig, revents)
          ok(true, 'got SIGALRM')
