@@ -17,10 +17,8 @@
 
 /**
  * Entry point into the 'ev' lua library.  Validates that the
- * dynamically linked libev version matches, initializes the
- * ev_default_fork hook so that fork()'ing doesn't confuse libev,
- * creates the object registry, and creates the table returned by
- * require().
+ * dynamically linked libev version matches, creates the object
+ * registry, and creates the table returned by require().
  */
 LUALIB_API int luaopen_ev(lua_State *L) {
 
