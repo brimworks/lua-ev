@@ -2,7 +2,6 @@
 #include <ev.h>
 #include <lauxlib.h>
 #include <lua.h>
-#include <pthread.h>
 
 #include "lua_ev.h"
 

@@ -358,8 +358,5 @@ IMPROVEMENT NOTE:
 
 TODO:
 
-  * Make the pthread library optional (currently we just register the
-    libev ev_default_fork function via pthread_atfork).
-
   * Add support for other watcher types (signals, stat, periodic,
     child, idle, embed, async, etc).
