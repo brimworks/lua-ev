@@ -97,7 +97,9 @@ static void              loop_start_watcher(lua_State* L, int loop_i, int watche
 static void              loop_stop_watcher(lua_State* L, int loop_i, int watcher_i);
 static int               loop_is_default(lua_State *L);
 static int               loop_iteration(lua_State *L);
+#if HAVE_LOOP_DEPTH
 static int               loop_depth(lua_State *L);
+#endif
 static int               loop_now(lua_State *L);
 static int               loop_update_now(lua_State *L);
 static int               loop_loop(lua_State *L);
@@ -111,7 +113,9 @@ static int               loop_fork(lua_State *L);
 static void              create_obj_registry(lua_State *L);
 static int               obj_count(lua_State *L);
 static void*             obj_new(lua_State* L, size_t size, const char* tname);
+#if 0
 static int               push_obj(lua_State* L, void* obj);
+#endif
 static int               push_objs(lua_State* L, void** objs);
 
 /**
@@ -144,7 +148,6 @@ static int               luaopen_ev_io(lua_State *L);
 static int               create_io_mt(lua_State *L);
 static int               io_new(lua_State* L);
 static void              io_cb(struct ev_loop* loop, ev_io* io, int revents);
-static int               io_again(lua_State *L);
 static int               io_stop(lua_State *L);
 static int               io_start(lua_State *L);
 
@@ -155,7 +158,6 @@ static int               luaopen_ev_signal(lua_State *L);
 static int               create_signal_mt(lua_State *L);
 static int               signal_new(lua_State* L);
 static void              signal_cb(struct ev_loop* loop, ev_signal* sig, int revents);
-static int               signal_again(lua_State *L);
 static int               signal_stop(lua_State *L);
 static int               signal_start(lua_State *L);
 
@@ -166,6 +168,5 @@ static int               luaopen_ev_idle(lua_State *L);
 static int               create_idle_mt(lua_State *L);
 static int               idle_new(lua_State* L);
 static void              idle_cb(struct ev_loop* loop, ev_idle* idle, int revents);
-static int               idle_again(lua_State *L);
 static int               idle_stop(lua_State *L);
 static int               idle_start(lua_State *L);

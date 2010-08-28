@@ -70,8 +70,6 @@ static int watcher_clear_pending(lua_State *L) {
  */
 static void* watcher_new(lua_State* L, size_t size, const char* lua_type, int data_offset) {
     void*  obj;
-    int    result;
-    void** data;
 
     luaL_checktype(L, 1, LUA_TFUNCTION);
 

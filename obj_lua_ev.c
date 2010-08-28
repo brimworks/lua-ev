@@ -131,6 +131,7 @@ static void register_obj(lua_State*L, int obj_i, void* obj) {
     lua_pop(L,               1);
 }
 
+#if 0
 /**
  * Simply calls push_objs() with a single object.
  */
@@ -138,6 +139,7 @@ static int push_obj(lua_State* L, void* obj) {
     void* objs[2] = { obj, NULL };
     return push_objs(L, objs);
 }
+#endif
 
 /**
  * Pushes the lua representation of n objects onto the stack.  The
