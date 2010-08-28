@@ -13,6 +13,7 @@
 #include "io_lua_ev.c"
 #include "timer_lua_ev.c"
 #include "signal_lua_ev.c"
+#include "idle_lua_ev.c"
 
 /**
  * Entry point into the 'ev' lua library.  Validates that the
@@ -26,7 +27,7 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     create_obj_registry(L);
 
-    lua_createtable(L, 0, 10);
+    lua_createtable(L, 0, 12);
 
     luaopen_ev_loop(L);
     lua_setfield(L, -2, "Loop");
@@ -39,6 +40,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     luaopen_ev_signal(L);
     lua_setfield(L, -2, "Signal");
+
+    luaopen_ev_idle(L);
+    lua_setfield(L, -2, "Idle");
 
     lua_pushcfunction(L, version);
     lua_setfield(L, -2, "version");
@@ -57,6 +61,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     lua_pushnumber(L, EV_SIGNAL);
     lua_setfield(L, -2, "SIGNAL");
+
+    lua_pushnumber(L, EV_IDLE);
+    lua_setfield(L, -2, "IDLE");
 
     return 1;
 }

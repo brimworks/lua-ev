@@ -22,6 +22,7 @@
 #define IO_MT     "ev{io}"
 #define TIMER_MT  "ev{timer}"
 #define SIGNAL_MT "ev{signal}"
+#define IDLE_MT   "ev{idle}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -58,6 +59,9 @@
 
 #define check_signal(L, narg)                                   \
     ((struct ev_signal*)   obj_check((L), (narg), SIGNAL_MT))
+
+#define check_idle(L, narg)                                      \
+    ((struct ev_idle*)     obj_check((L), (narg), IDLE_MT))
 
 
 /**
@@ -157,3 +161,18 @@ static int               signal_is_active(lua_State *L);
 static int               signal_is_pending(lua_State *L);
 static int               signal_clear_pending(lua_State *L);
 static int               signal_callback(lua_State *L);
+
+/**
+ * Idle functions:
+ */
+static int               luaopen_ev_idle(lua_State *L);
+static int               create_idle_mt(lua_State *L);
+static int               idle_new(lua_State* L);
+static void              idle_cb(struct ev_loop* loop, ev_idle* idle, int revents);
+static int               idle_again(lua_State *L);
+static int               idle_stop(lua_State *L);
+static int               idle_start(lua_State *L);
+static int               idle_is_active(lua_State *L);
+static int               idle_is_pending(lua_State *L);
+static int               idle_clear_pending(lua_State *L);
+static int               idle_callback(lua_State *L);
