@@ -89,20 +89,22 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
 }
 
 /**
- * Checks that "object" has a metatable of tname.
+ * Checks that "object" has a metatable ancestor of tname.
  *
  * [-0, +0, ?]
  */
 static void *obj_check(lua_State *L, int obj_i, const char *tname) {
     void *udata = lua_touserdata(L, obj_i);
+    luaL_getmetatable(L, tname);
     if (udata && lua_getmetatable(L, obj_i)) {
         lua_pushliteral(L, "__index");
         lua_rawget(L, -2);
-        if (lua_getmetatable(L, -1)) {
-            luaL_getmetatable(L, tname);
-            if (lua_rawequal(L, -1, -2)) {
+        while (lua_getmetatable(L, -1)) {
+            if (lua_rawequal(L, -1, -4)) {
                 lua_pop(L, 4);
                 return udata;
+            } else {
+                lua_remove(L, -2);
             }
         }
     }
