@@ -12,6 +12,7 @@ static int create_watcher_mt(lua_State *L) {
         { "is_pending",    watcher_is_pending },
         { "clear_pending", watcher_clear_pending },
         { "callback",      watcher_callback },
+        { "priority",      watcher_priority },
         { NULL, NULL }
     };
     luaL_newmetatable(L, WATCHER_MT);
@@ -168,5 +169,25 @@ static int watcher_callback(lua_State *L) {
         lua_rawseti(L, -3, WATCHER_FN);
     }
     lua_remove(L, -2);
+    return 1;
+}
+
+/**
+ * Get/set the watcher priority.  If passed a new_priority, then the
+ * old_priority will be returned.  Otherwise, just returns the current
+ * priority.
+ *
+ * Usage:
+ *   old_priority = watcher:priority([new_priority])
+ *
+ * [+1, -0, e]
+ */
+static int watcher_priority(lua_State *L) {
+    int has_pri = lua_gettop(L) > 1;
+    ev_watcher *w = obj_check(L, 1, WATCHER_MT);
+    int old_pri = ev_priority(w);
+
+    if ( has_pri ) ev_set_priority(w, luaL_checkint(L, 2));
+    lua_pushinteger(L, old_pri);
     return 1;
 }

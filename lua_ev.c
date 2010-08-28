@@ -27,7 +27,7 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     create_obj_registry(L);
 
-    lua_createtable(L, 0, 12);
+    lua_createtable(L, 0, 14);
 
     luaopen_ev_loop(L);
     lua_setfield(L, -2, "Loop");
@@ -66,6 +66,12 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     lua_pushnumber(L, EV_IDLE);
     lua_setfield(L, -2, "IDLE");
+
+    lua_pushnumber(L, EV_MINPRI);
+    lua_setfield(L, -2, "MINPRI");
+
+    lua_pushnumber(L, EV_MAXPRI);
+    lua_setfield(L, -2, "MAXPRI");
 
     return 1;
 }
