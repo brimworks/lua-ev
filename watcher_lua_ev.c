@@ -1,6 +1,68 @@
 #include <stdint.h>
 
 /**
+ * Create the watcher metatable in the registry.
+ *
+ * [-0, +1, ?]
+ */
+static int create_watcher_mt(lua_State *L) {
+
+    static luaL_reg fns[] = {
+        { "is_active",     watcher_is_active },
+        { "is_pending",    watcher_is_pending },
+        { "clear_pending", watcher_clear_pending },
+        { "callback",      watcher_callback },
+        { NULL, NULL }
+    };
+    luaL_newmetatable(L, WATCHER_MT);
+    luaL_register(L, NULL, fns);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+
+    return 1;
+}
+
+/**
+ * Test if the watcher is active.
+ *
+ * Usage:
+ *   bool = watcher:is_active()
+ *
+ * [+1, -0, e]
+ */
+static int watcher_is_active(lua_State *L) {
+    lua_pushboolean(L, ev_is_active(check_watcher(L, 1)));
+    return 1;
+}
+
+/**
+ * Test if the watcher is pending.
+ *
+ * Usage:
+ *   bool = watcher:is_pending()
+ *
+ * [+1, -0, e]
+ */
+static int watcher_is_pending(lua_State *L) {
+    lua_pushboolean(L, ev_is_pending(check_watcher(L, 1)));
+    return 1;
+}
+
+/**
+ * If the watcher is pending, return the revents and clear the pending
+ * status (so the watcher callback won't be called).
+ *
+ * Usage:
+ *   revents = watcher:clear_pending(loop)
+ *
+ * [+1, -0, e]
+ */
+static int watcher_clear_pending(lua_State *L) {
+    lua_pushnumber(L, ev_clear_pending(*check_loop_and_init(L, 2), check_watcher(L, 1)));
+    return 1;
+}
+
+/**
  * Implement the new function on all the watcher objects.  The first
  * element on the stack must be the callback function.
  *
@@ -92,14 +154,14 @@ static void watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, i
  * callback function.
  *
  * Usage:
- *   old_callback = timer:callback([new_callback])
+ *   old_callback = watcher:callback([new_callback])
  *
  * [+1, -0, e]
  */
-static int watcher_callback(lua_State *L, const char* tname) {
+static int watcher_callback(lua_State *L) {
     int has_fn = lua_gettop(L) > 1;
 
-    obj_check(L, 1, tname);
+    obj_check(L, 1, WATCHER_MT);
     if ( has_fn ) luaL_checktype(L, 2, LUA_TFUNCTION);
 
     lua_getfenv(L, 1);

@@ -32,6 +32,8 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     luaopen_ev_loop(L);
     lua_setfield(L, -2, "Loop");
 
+    lua_pop(L, create_watcher_mt(L));
+
     luaopen_ev_timer(L);
     lua_setfield(L, -2, "Timer");
 

@@ -25,16 +25,14 @@ static int create_io_mt(lua_State *L) {
     static luaL_reg fns[] = {
         { "stop",          io_stop },
         { "start",         io_start },
-        { "is_active",     io_is_active },
-        { "is_pending",    io_is_pending },
-        { "clear_pending", io_clear_pending },
-        { "callback",      io_callback },
         { NULL, NULL }
     };
     luaL_newmetatable(L, IO_MT);
     luaL_register(L, NULL, fns);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
+    luaL_getmetatable(L, WATCHER_MT);
+    lua_setmetatable(L, -2);
 
     return 1;
 }
@@ -106,53 +104,4 @@ static int io_start(lua_State *L) {
     loop_start_watcher(L, 2, 1, is_daemon);
 
     return 0;
-}
-
-/**
- * Test if the io is active.
- *
- * Usage:
- *   bool = io:is_active()
- *
- * [+1, -0, e]
- */
-static int io_is_active(lua_State *L) {
-    lua_pushboolean(L, ev_is_active(check_io(L, 1)));
-    return 1;
-}
-
-/**
- * Test if the io is pending.
- *
- * Usage:
- *   bool = io:is_pending()
- *
- * [+1, -0, e]
- */
-static int io_is_pending(lua_State *L) {
-    lua_pushboolean(L, ev_is_pending(check_io(L, 1)));
-    return 1;
-}
-
-/**
- * If the io is pending, return the revents and clear the pending
- * status (so the io callback won't be called).
- *
- * Usage:
- *   revents = io:clear_pending(loop)
- *
- * [+1, -0, e]
- */
-static int io_clear_pending(lua_State *L) {
-    lua_pushnumber(L, ev_clear_pending(*check_loop_and_init(L, 2), check_io(L, 1)));
-    return 1;
-}
-
-/**
- * @see watcher_callback()
- *
- * [+1, -0, e]
- */
-static int io_callback(lua_State *L) {
-    return watcher_callback(L, IO_MT);
 }

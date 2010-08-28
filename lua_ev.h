@@ -18,11 +18,12 @@
 /**
  * Define the names used for the metatables.
  */
-#define LOOP_MT   "ev{loop}"
-#define IO_MT     "ev{io}"
-#define TIMER_MT  "ev{timer}"
-#define SIGNAL_MT "ev{signal}"
-#define IDLE_MT   "ev{idle}"
+#define LOOP_MT    "ev{loop}"
+#define WATCHER_MT "ev{watcher}"
+#define IO_MT      "ev{io}"
+#define TIMER_MT   "ev{timer}"
+#define SIGNAL_MT  "ev{signal}"
+#define IDLE_MT    "ev{idle}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -50,6 +51,9 @@
  */
 #define check_loop(L, narg)                                      \
     ((struct ev_loop**)    obj_check((L), (narg), LOOP_MT))
+
+#define check_watcher(L, narg)                                   \
+    ((struct ev_watcher*)  obj_check((L), (narg), WATCHER_MT))
 
 #define check_timer(L, narg)                                     \
     ((struct ev_timer*)    obj_check((L), (narg), TIMER_MT))
@@ -113,8 +117,12 @@ static int               push_objs(lua_State* L, void** objs);
 /**
  * Watcher functions:
  */
+static int               create_watcher_mt(lua_State *L);
+static int               watcher_is_active(lua_State *L);
+static int               watcher_is_pending(lua_State *L);
+static int               watcher_clear_pending(lua_State *L);
 static void*             watcher_new(lua_State* L, size_t size, const char* lua_type, int data_offset);
-static int               watcher_callback(lua_State *L, const char* tname);
+static int               watcher_callback(lua_State *L);
 static void              watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, int revents);
 
 /**
@@ -127,10 +135,7 @@ static void              timer_cb(struct ev_loop* loop, ev_timer* timer, int rev
 static int               timer_again(lua_State *L);
 static int               timer_stop(lua_State *L);
 static int               timer_start(lua_State *L);
-static int               timer_is_active(lua_State *L);
-static int               timer_is_pending(lua_State *L);
 static int               timer_clear_pending(lua_State *L);
-static int               timer_callback(lua_State *L);
 
 /**
  * IO functions:
@@ -142,10 +147,6 @@ static void              io_cb(struct ev_loop* loop, ev_io* io, int revents);
 static int               io_again(lua_State *L);
 static int               io_stop(lua_State *L);
 static int               io_start(lua_State *L);
-static int               io_is_active(lua_State *L);
-static int               io_is_pending(lua_State *L);
-static int               io_clear_pending(lua_State *L);
-static int               io_callback(lua_State *L);
 
 /**
  * Signal functions:
@@ -157,10 +158,6 @@ static void              signal_cb(struct ev_loop* loop, ev_signal* sig, int rev
 static int               signal_again(lua_State *L);
 static int               signal_stop(lua_State *L);
 static int               signal_start(lua_State *L);
-static int               signal_is_active(lua_State *L);
-static int               signal_is_pending(lua_State *L);
-static int               signal_clear_pending(lua_State *L);
-static int               signal_callback(lua_State *L);
 
 /**
  * Idle functions:
@@ -172,7 +169,3 @@ static void              idle_cb(struct ev_loop* loop, ev_idle* idle, int revent
 static int               idle_again(lua_State *L);
 static int               idle_stop(lua_State *L);
 static int               idle_start(lua_State *L);
-static int               idle_is_active(lua_State *L);
-static int               idle_is_pending(lua_State *L);
-static int               idle_clear_pending(lua_State *L);
-static int               idle_callback(lua_State *L);

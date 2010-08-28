@@ -25,16 +25,14 @@ static int create_idle_mt(lua_State *L) {
     static luaL_reg fns[] = {
         { "stop",          idle_stop },
         { "start",         idle_start },
-        { "is_active",     idle_is_active },
-        { "is_pending",    idle_is_pending },
-        { "clear_pending", idle_clear_pending },
-        { "callback",      idle_callback },
         { NULL, NULL }
     };
     luaL_newmetatable(L, IDLE_MT);
     luaL_register(L, NULL, fns);
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
+    luaL_getmetatable(L, WATCHER_MT);
+    lua_setmetatable(L, -2);
 
     return 1;
 }
@@ -102,53 +100,4 @@ static int idle_start(lua_State *L) {
     loop_start_watcher(L, 2, 1, is_daemon);
 
     return 0;
-}
-
-/**
- * Test if the idle is active.
- *
- * Usage:
- *   bool = idle:is_active()
- *
- * [+1, -0, e]
- */
-static int idle_is_active(lua_State *L) {
-    lua_pushboolean(L, ev_is_active(check_idle(L, 1)));
-    return 1;
-}
-
-/**
- * Test if the idle is pending.
- *
- * Usage:
- *   bool = idle:is_pending()
- *
- * [+1, -0, e]
- */
-static int idle_is_pending(lua_State *L) {
-    lua_pushboolean(L, ev_is_pending(check_idle(L, 1)));
-    return 1;
-}
-
-/**
- * If the idle is pending, return the revents and clear the pending
- * status (so the idle callback won't be called).
- *
- * Usage:
- *   revents = idle:clear_pending(loop)
- *
- * [+1, -0, e]
- */
-static int idle_clear_pending(lua_State *L) {
-    lua_pushnumber(L, ev_clear_pending(*check_loop_and_init(L, 2), check_idle(L, 1)));
-    return 1;
-}
-
-/**
- * @see watcher_callback()
- *
- * [+1, -0, e]
- */
-static int idle_callback(lua_State *L) {
-    return watcher_callback(L, IDLE_MT);
 }
