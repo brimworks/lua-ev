@@ -48,16 +48,16 @@
  * result.
  */
 #define check_loop(L, narg)                                      \
-    ((struct ev_loop**)    luaL_checkudata((L), (narg), LOOP_MT))
+    ((struct ev_loop**)    obj_check((L), (narg), LOOP_MT))
 
 #define check_timer(L, narg)                                     \
-    ((struct ev_timer*)    luaL_checkudata((L), (narg), TIMER_MT))
+    ((struct ev_timer*)    obj_check((L), (narg), TIMER_MT))
 
 #define check_io(L, narg)                                        \
-    ((struct ev_io*)       luaL_checkudata((L), (narg), IO_MT))
+    ((struct ev_io*)       obj_check((L), (narg), IO_MT))
 
 #define check_signal(L, narg)                                   \
-    ((struct ev_signal*)   luaL_checkudata((L), (narg), SIGNAL_MT))
+    ((struct ev_signal*)   obj_check((L), (narg), SIGNAL_MT))
 
 
 /**

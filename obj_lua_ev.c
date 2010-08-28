@@ -49,14 +49,65 @@ static int obj_count(lua_State *L) {
 static void* obj_new(lua_State* L, size_t size, const char* tname) {
     void* obj;
 
-    obj = lua_newuserdata(L, size);
-    luaL_getmetatable(L,     tname);
+    /*
+     * class = luaL_getmetatable(tname)
+     * shadow = setmetatable({ }, class)
+     * fenv = { __gc = class.__gc, __index = shadow, __newindex = shadow }
+     * setfenv(obj, fenv)
+     * setmetatable(obj, fenv)
+     *
+     * to check:  getmetatable(getmetatable(obj).__index) == class
+     */
+
+    obj = lua_newuserdata(L, size);    /* obj */
+    lua_newtable(L);                   /* obj shadow */
+    lua_newtable(L);                   /* obj shadow fenv */
+    luaL_getmetatable(L, tname);       /* obj shadow fenv class */
 
     assert(lua_istable(L, -1) /* tname was loaded */);
 
-    lua_setmetatable(L, -2);
+    /* fenv.__gc = class.__gc */
+    lua_pushliteral(L, "__gc");        /* obj shadow fenv class "__gc" */
+    lua_rawget(L, -2);                 /* obj shadow fenv class __gc */
+    lua_setfield(L, -3, "__gc");       /* obj shadow fenv class */
+    /* setmetatable(shadow, class) */
+    lua_setmetatable(L, -3);           /* obj shadow fenv */
+    /* fenv.__index = shadow */
+    lua_pushvalue(L, -2);              /* obj shadow fenv shadow */
+    lua_setfield(L, -2, "__index");    /* obj shadow fenv */
+    /* fenv.__newindex = shadow */
+    lua_pushvalue(L, -2);              /* obj shadow fenv shadow */
+    lua_setfield(L, -2, "__newindex"); /* obj shadow fenv */
+    lua_remove(L, -2);                 /* obj fenv */
+    /* setfenv(obj, fenv) */
+    lua_pushvalue(L, -1);              /* obj fenv fenv */
+    lua_setfenv(L, -3);                /* obj fenv */
+    /* setmetatable(obj, fenv) */
+    lua_setmetatable(L, -2);           /* obj */
 
     return obj;
+}
+
+/**
+ * Checks that "object" has a metatable of tname.
+ *
+ * [-0, +0, ?]
+ */
+static void *obj_check(lua_State *L, int obj_i, const char *tname) {
+    void *udata = lua_touserdata(L, obj_i);
+    if (udata && lua_getmetatable(L, obj_i)) {
+        lua_pushliteral(L, "__index");
+        lua_rawget(L, -2);
+        if (lua_getmetatable(L, -1)) {
+            luaL_getmetatable(L, tname);
+            if (lua_rawequal(L, -1, -2)) {
+                lua_pop(L, 4);
+                return udata;
+            }
+        }
+    }
+    luaL_typerror(L, obj_i, tname);
+    return NULL; /* not reached */
 }
 
 /**

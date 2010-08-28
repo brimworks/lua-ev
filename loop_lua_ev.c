@@ -59,13 +59,8 @@ static int create_loop_mt(lua_State *L) {
  * [-0, +1, v]
  */
 static struct ev_loop** loop_alloc(lua_State *L) {
-    int              result;
     struct ev_loop** loop = (struct ev_loop**)
         obj_new(L, sizeof(struct ev_loop*), LOOP_MT);
-
-    lua_newtable(L);
-    result = lua_setfenv(L, -2);
-    assert(result == 1 /* setfenv() was successful */);
 
     return loop;
 }

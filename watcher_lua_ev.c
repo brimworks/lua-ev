@@ -18,13 +18,11 @@ static void* watcher_new(lua_State* L, size_t size, const char* lua_type, int da
 
     *(void**)((uint8_t*)obj + data_offset) = L;
 
-
-    lua_createtable(L, 1, 0);
+    lua_getfenv(L, -1);
     lua_pushvalue(L, 1);
     lua_rawseti(L, -2, WATCHER_FN);
 
-    result = lua_setfenv(L, -2);
-    assert(result == 1 /* setfenv was successful */);
+    lua_pop(L, 1);
 
     return obj;
 }
@@ -101,7 +99,7 @@ static void watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, i
 static int watcher_callback(lua_State *L, const char* tname) {
     int has_fn = lua_gettop(L) > 1;
 
-    luaL_checkudata(L, 1, tname);
+    obj_check(L, 1, tname);
     if ( has_fn ) luaL_checktype(L, 2, LUA_TFUNCTION);
 
     lua_getfenv(L, 1);
