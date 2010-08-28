@@ -50,11 +50,7 @@ static int signal_new(lua_State* L) {
     int         signum = luaL_checkint(L, 2);
     ev_signal*  sig;
 
-    sig = watcher_new(L,
-                      sizeof(ev_signal),
-                      SIGNAL_MT,
-                      offsetof(ev_signal, data));
-
+    sig = watcher_new(L, sizeof(ev_signal), SIGNAL_MT);
     ev_signal_init(sig, &signal_cb, signum);
     return 1;
 }
@@ -65,7 +61,7 @@ static int signal_new(lua_State* L) {
  * [+0, -0, m]
  */
 static void signal_cb(struct ev_loop* loop, ev_signal* sig, int revents) {
-    watcher_cb(sig->data, loop, sig, revents);
+    watcher_cb(loop, sig, revents);
 }
 
 /**

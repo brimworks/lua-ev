@@ -59,10 +59,7 @@ static int timer_new(lua_State* L) {
     if ( repeat < 0.0 )
         luaL_argerror(L, 3, "repeat must be greater than or equal to 0");
 
-    timer = watcher_new(L,
-                        sizeof(ev_timer),
-                        TIMER_MT,
-                        offsetof(ev_timer, data));
+    timer = watcher_new(L, sizeof(ev_timer), TIMER_MT);
     ev_timer_init(timer, &timer_cb, after, repeat);
     return 1;
 }
@@ -73,7 +70,7 @@ static int timer_new(lua_State* L) {
  * [+0, -0, m]
  */
 static void timer_cb(struct ev_loop* loop, ev_timer* timer, int revents) {
-    watcher_cb(timer->data, loop, timer, revents);
+    watcher_cb(loop, timer, revents);
 }
 
 /**

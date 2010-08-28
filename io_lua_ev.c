@@ -52,10 +52,7 @@ static int io_new(lua_State* L) {
     int     events = luaL_checkint(L, 3);
     ev_io*  io;
 
-    io = watcher_new(L,
-                     sizeof(ev_io),
-                     IO_MT,
-                     offsetof(ev_io, data));
+    io = watcher_new(L, sizeof(ev_io), IO_MT);
     ev_io_init(io, &io_cb, fd, events);
     return 1;
 }
@@ -66,7 +63,7 @@ static int io_new(lua_State* L) {
  * [+0, -0, m]
  */
 static void io_cb(struct ev_loop* loop, ev_io* io, int revents) {
-    watcher_cb(io->data, loop, io, revents);
+    watcher_cb(loop, io, revents);
 }
 
 /**

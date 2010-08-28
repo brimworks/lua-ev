@@ -48,10 +48,7 @@ static int create_idle_mt(lua_State *L) {
 static int idle_new(lua_State* L) {
     ev_idle*  idle;
 
-    idle = watcher_new(L,
-                       sizeof(ev_idle),
-                       IDLE_MT,
-                       offsetof(ev_idle, data));
+    idle = watcher_new(L, sizeof(ev_idle), IDLE_MT);
     ev_idle_init(idle, &idle_cb);
     return 1;
 }
@@ -62,7 +59,7 @@ static int idle_new(lua_State* L) {
  * [+0, -0, m]
  */
 static void idle_cb(struct ev_loop* loop, ev_idle* idle, int revents) {
-    watcher_cb(idle->data, loop, idle, revents);
+    watcher_cb(loop, idle, revents);
 }
 
 /**

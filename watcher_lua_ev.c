@@ -68,15 +68,13 @@ static int watcher_clear_pending(lua_State *L) {
  *
  * [+1, -0, ?]
  */
-static void* watcher_new(lua_State* L, size_t size, const char* lua_type, int data_offset) {
+static void* watcher_new(lua_State* L, size_t size, const char* lua_type) {
     void*  obj;
 
     luaL_checktype(L, 1, LUA_TFUNCTION);
 
     obj = obj_new(L, size, lua_type);
     register_obj(L, -1, obj);
-
-    *(void**)((uint8_t*)obj + data_offset) = L;
 
     lua_getfenv(L, -1);
     lua_pushvalue(L, 1);
@@ -96,8 +94,8 @@ static void* watcher_new(lua_State* L, size_t size, const char* lua_type, int da
  *
  * [+0, -0, m]
  */
-static void watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, int revents) {
-    lua_State* L       = (lua_State*)lua_State_L;
+static void watcher_cb(struct ev_loop *loop, void *watcher, int revents) {
+    lua_State* L       = ev_userdata(loop);
     void*      objs[3] = { loop, watcher, NULL };
     int        result;
 

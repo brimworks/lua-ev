@@ -251,7 +251,11 @@ static int loop_update_now(lua_State *L) {
  * Actually do the event loop.
  */
 static int loop_loop(lua_State *L) {
-    ev_loop(*check_loop_and_init(L, 1), 0);
+    struct ev_loop *loop = *check_loop_and_init(L, 1);
+    void *old_userdata = ev_userdata(loop);
+    ev_set_userdata(loop, L);
+    ev_loop(loop, 0);
+    ev_set_userdata(loop, old_userdata);
     return 0;
 }
 

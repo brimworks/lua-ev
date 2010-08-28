@@ -125,9 +125,9 @@ static int               create_watcher_mt(lua_State *L);
 static int               watcher_is_active(lua_State *L);
 static int               watcher_is_pending(lua_State *L);
 static int               watcher_clear_pending(lua_State *L);
-static void*             watcher_new(lua_State* L, size_t size, const char* lua_type, int data_offset);
+static void*             watcher_new(lua_State* L, size_t size, const char* lua_type);
 static int               watcher_callback(lua_State *L);
-static void              watcher_cb(void* lua_State_L, struct ev_loop *loop, void *watcher, int revents);
+static void              watcher_cb(struct ev_loop *loop, void *watcher, int revents);
 
 /**
  * Timer functions:
