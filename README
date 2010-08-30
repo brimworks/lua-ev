@@ -151,6 +151,29 @@ io = ev.IO.new(on_io, file_descriptor, revents)
 
     See also ev_io_init() C function.
 
+idle = ev.Idle.new(on_idle)
+
+    Create a new io watcher that will call the on_idle function
+    whenever there is nothing else to do.  This means that the loop
+    will never block while an idle watcher is started.
+
+    The returned io is an ev.Idle object.  See below for the methods on
+    this object.
+
+    NOTE: You must explicitly register the idle with an event loop in
+    order for it to take effect.
+
+    The on_idle function will be called with these arguments (return
+    values are ignored):
+
+    on_idle(loop, idle, revents)
+
+        The loop is the event loop for which the idle object is
+        registered, the idle parameter is the ev.Idle object, and
+        revents is ev.IDLE.
+
+    See also ev_idle_init() C function.
+
 ev.READ (constant)
 
     If this bit is set, the io watcher is ready to read.  See also
@@ -316,6 +339,23 @@ io:start(loop [, is_daemon])
 io:stop(loop)
 
     Unregister this io from the specified event loop.  Ensures that
+    the watcher is neither active nor pending.
+
+    See also ev_io_stop() C function (document as ev_TYPE_stop()).
+
+-- ev.Idle object methods --
+
+io:start(loop [, is_daemon])
+
+    Start the idle in the specified event loop.  Optionally make this
+    watcher a "daemon" watcher which means that the event loop will
+    terminate even if this watcher has not triggered.
+
+    See also ev_io_start() C function (document as ev_TYPE_start()).
+
+io:stop(loop)
+
+    Unregister this idle from the specified event loop.  Ensures that
     the watcher is neither active nor pending.
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
