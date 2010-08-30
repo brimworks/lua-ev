@@ -113,6 +113,8 @@ static int               loop_fork(lua_State *L);
 static void              create_obj_registry(lua_State *L);
 static int               obj_count(lua_State *L);
 static void*             obj_new(lua_State* L, size_t size, const char* tname);
+static int               obj_lazy_newindex(lua_State *L);
+static void *            obj_check(lua_State *L, int obj_i, const char *tname);
 #if 0
 static int               push_obj(lua_State* L, void* obj);
 #endif

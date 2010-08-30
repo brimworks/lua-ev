@@ -51,34 +51,31 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
 
     /*
      * class = luaL_getmetatable(tname)
-     * shadow = setmetatable({ }, class)
-     * fenv = { __gc = class.__gc, __index = shadow, __newindex = shadow }
+     * fenv = { __gc = class.__gc,
+     *          __index = class,
+     *          __newindex = obj_lazy_newindex,
+     *          class = class }
      * setfenv(obj, fenv)
      * setmetatable(obj, fenv)
-     *
-     * to check:  getmetatable(getmetatable(obj).__index) == class
      */
-
     obj = lua_newuserdata(L, size);    /* obj */
-    lua_newtable(L);                   /* obj shadow */
-    lua_newtable(L);                   /* obj shadow fenv */
-    luaL_getmetatable(L, tname);       /* obj shadow fenv class */
+    lua_createtable(L, 0, 4);          /* obj fenv */
+    luaL_getmetatable(L, tname);       /* obj fenv class */
 
     assert(lua_istable(L, -1) /* tname was loaded */);
 
     /* fenv.__gc = class.__gc */
-    lua_pushliteral(L, "__gc");        /* obj shadow fenv class "__gc" */
-    lua_rawget(L, -2);                 /* obj shadow fenv class __gc */
-    lua_setfield(L, -3, "__gc");       /* obj shadow fenv class */
-    /* setmetatable(shadow, class) */
-    lua_setmetatable(L, -3);           /* obj shadow fenv */
-    /* fenv.__index = shadow */
-    lua_pushvalue(L, -2);              /* obj shadow fenv shadow */
-    lua_setfield(L, -2, "__index");    /* obj shadow fenv */
-    /* fenv.__newindex = shadow */
-    lua_pushvalue(L, -2);              /* obj shadow fenv shadow */
-    lua_setfield(L, -2, "__newindex"); /* obj shadow fenv */
-    lua_remove(L, -2);                 /* obj fenv */
+    lua_pushliteral(L, "__gc");        /* obj fenv class "__gc" */
+    lua_rawget(L, -2);                 /* obj fenv class __gc */
+    lua_setfield(L, -3, "__gc");       /* obj fenv class */
+    /* fenv.class = class */
+    lua_pushvalue(L, -1);              /* obj fenv class class */
+    lua_setfield(L, -3, "class");      /* obj fenv class */
+    /* fenv.__index = class */
+    lua_setfield(L, -2, "__index");    /* obj fenv */
+    /* fenv.__newindex = obj_lazy_newindex */
+    lua_pushcfunction(L, obj_lazy_newindex); /* obj fenv obj_lazy_newindex */
+    lua_setfield(L, -2, "__newindex"); /* obj fenv */
     /* setfenv(obj, fenv) */
     lua_pushvalue(L, -1);              /* obj fenv fenv */
     lua_setfenv(L, -3);                /* obj fenv */
@@ -86,6 +83,37 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
     lua_setmetatable(L, -2);           /* obj */
 
     return obj;
+}
+
+/**
+ * Lazily create a shadow table for an object, set the desired value,
+ * and redirect the object's metatable to use it directly from now on.
+ *
+ * [-0, +0, ?]
+ */
+static int obj_lazy_newindex(lua_State *L)
+{
+    /*
+     * fenv = getmetatable(obj)
+     * shadow = { [key] = value }
+     * setmetatable(shadow, fenv.__index)
+     * fenv.__index = shadow
+     * fenv.__newindex = shadow
+     */
+    lua_getmetatable(L, 1);            /* fenv */
+    lua_createtable(L, 0, 1);          /* fenv shadow */
+    /* shadow[key] = value */
+    lua_pushvalue(L, 2);               /* fenv shadow key */
+    lua_pushvalue(L, 3);               /* fenv shadow key value */
+    lua_rawset(L, -3);                 /* fenv shadow */
+    /* setmetatable(shadow, fenv.__index) */
+    lua_getfield(L, -2, "__index");    /* fenv shadow class */
+    lua_setmetatable(L, -2);           /* fenv shadow */
+    /* fenv.__index = shadow; fenv.__newindex = shadow */
+    lua_pushvalue(L, -1);              /* fenv shadow shadow */
+    lua_setfield(L, -3, "__index");    /* fenv shadow */
+    lua_setfield(L, -2, "__newindex"); /* fenv */
+    return 0;
 }
 
 /**
@@ -97,13 +125,15 @@ static void *obj_check(lua_State *L, int obj_i, const char *tname) {
     void *udata = lua_touserdata(L, obj_i);
     luaL_getmetatable(L, tname);
     if (udata && lua_getmetatable(L, obj_i)) {
-        lua_pushliteral(L, "__index");
+        lua_pushliteral(L, "class");
         lua_rawget(L, -2);
-        while (lua_getmetatable(L, -1)) {
-            if (lua_rawequal(L, -1, -4)) {
-                lua_pop(L, 4);
+        while (1) {
+            if (lua_rawequal(L, -1, -3)) {
+                lua_pop(L, 3);
                 return udata;
             } else {
+                if (!lua_getmetatable(L, -1))
+                    break;
                 lua_remove(L, -2);
             }
         }
