@@ -264,6 +264,14 @@ revents = watcher:clear_pending()
 
     See also ev_clear_pending() C function.
 
+old_priority = watcher:priority([new_priority])
+
+    Get access to the priority of this watcher, optionally setting a
+    new priority.  The priority should be a small integer between
+    ev.MINPRI and ev.MAXPRI.  The default is 0.
+
+    See also the ev_priority() and ev_set_priority() C functions.
+
 old_callback = watcher:callback([new_callback])
 
     Get access to the callback function associated with this watcher,
