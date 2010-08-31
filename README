@@ -239,6 +239,36 @@ backend_id = loop:backend()
 
     http://pod.tst.eu/http://cvs.schmorp.de/libev/ev.pod#FUNCTIONS_CONTROLLING_THE_EVENT_LOOP
 
+-- object methods common to all watcher types --
+
+bool = watcher:is_active()
+
+    Returns true if the watcher is active (has been start()ed, but not
+    stop()ed).
+
+    See also ev_is_active() C function.
+
+bool = watcher:is_pending()
+
+    Returns true if the watcher is pending (it has outstanding events
+    but its callback has not yet been invoked).
+
+    See also ev_is_pending() C function.
+
+revents = watcher:clear_pending()
+
+    If the watcher is pending, return the revents of the pending
+    event, otherwise returns zero.  If the event was pending, the
+    pending flag is cleared (and therefore this watcher event will not
+    trigger the events callback).
+
+    See also ev_clear_pending() C function.
+
+old_callback = watcher:callback([new_callback])
+
+    Get access to the callback function associated with this watcher,
+    optionally setting a new callback function.
+
 -- ev.Timer object methods --
 
 timer:start(loop [, is_daemon])
@@ -265,34 +295,6 @@ timer:again(loop [, seconds])
 
     See also ev_timer_again() C function.
 
-bool = timer:is_active()
-
-    Returns true if the watcher is active (has been start()ed, but not
-    stop()ed).
-
-    See also ev_is_active() C function.
-
-bool = timer:is_pending()
-
-    Returns true if the watcher is pending (it has outstanding events
-    but its callback has not yet been invoked).
-
-    See also ev_is_pending() C function.
-
-revents = timer:clear_pending()
-
-    If the watcher is pending, return the revents of the pending
-    event, otherwise returns zero.  If the event was pending, the
-    pending flag is cleared (and therefore this watcher event will not
-    trigger the events callback).
-
-    See also ev_clear_pending() C function.
-
-old_on_timeout = timer:callback([new_on_timeout])
-
-    Get access to the callback function associated with this timer,
-    optionally setting a new callback function.
-
 -- ev.IO object methods --
 
 io:start(loop [, is_daemon])
@@ -309,34 +311,6 @@ io:stop(loop)
     the watcher is neither active nor pending.
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
-
-bool = io:is_active()
-
-    Returns true if the watcher is active (has been start()ed, but not
-    stop()ed).
-
-    See also ev_is_active() C function.
-
-bool = io:is_pending()
-
-    Returns true if the watcher is pending (it has outstanding events
-    but its callback has not yet been invoked).
-
-    See also ev_is_pending() C function.
-
-revents = io:clear_pending()
-
-    If the watcher is pending, return the revents of the pending
-    event, otherwise returns zero.  If the event was pending, the
-    pending flag is cleared (and therefore this watcher event will not
-    trigger the events callback).
-
-    See also ev_clear_pending() C function.
-
-on_timeout = io:callback()
-
-    Get access to the callback function associated with this timer,
-    optionally setting a new callback function.
 
 EXCEPTION HANDLING NOTE:
 
