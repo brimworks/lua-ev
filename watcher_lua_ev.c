@@ -145,11 +145,9 @@ static void watcher_cb(struct ev_loop *loop, void *watcher, int revents) {
 
     /* STACK: <traceback>, <loop>, <watcher> */
 
-    if ( revents & EV_TIMEOUT ) {
-        ev_timer* timer = (ev_timer*)watcher;
-
+    if ( !ev_is_active(watcher) ) {
         /* Must remove "stop"ed watcher from loop: */
-        if ( timer->repeat == 0.0 ) loop_stop_watcher(L, -2, -1);
+        loop_stop_watcher(L, -2, -1);
     }
 
     lua_getfenv(L, -1);

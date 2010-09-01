@@ -166,11 +166,12 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
 }
 
 /**
- * Must be called aftert stop()ing a watcher, or after a non-repeating
- * timer expires.  This is necessary so that the watcher is not
- * prematurely garbage collected, and if the watcher is "marked as a
- * daemon", then ev_ref() is called in order to "undo" what was done
- * in loop_add_watcher().
+ * Must be called aftert stop()ing a watcher, or after a watcher is
+ * automatically stopped (such as a non-repeating timer expiring).
+ * This is necessary so that the watcher is not prematurely garbage
+ * collected, and if the watcher is "marked as a daemon", then
+ * ev_ref() is called in order to "undo" what was done in
+ * loop_add_watcher().
  *
  * [-0, +0, m]
  */
