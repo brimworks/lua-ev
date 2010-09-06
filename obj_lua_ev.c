@@ -42,104 +42,71 @@ static int obj_count(lua_State *L) {
 
 /**
  * Create a new "object" with a metatable of tname and allocate size
- * bytes for the object.
+ * bytes for the object.  Also create an fenv associated with the
+ * object.  This fenv is used to keep track of lua objects so that the
+ * garbage collector doesn't prematurely collect lua objects that are
+ * referenced by the C data structure.
  *
  * [-0, +1, ?]
  */
 static void* obj_new(lua_State* L, size_t size, const char* tname) {
     void* obj;
+    int result;
 
-    /*
-     * class = luaL_getmetatable(tname)
-     * fenv = { __gc = class.__gc,
-     *          __index = class,
-     *          __newindex = obj_lazy_newindex,
-     *          class = class }
-     * setfenv(obj, fenv)
-     * setmetatable(obj, fenv)
+    obj = lua_newuserdata(L, size);
+    luaL_getmetatable(L,     tname);
+    lua_setmetatable(L,      -2);
+
+    /* Optimized for "watcher" creation that does not use a shadow
+     * table:
      */
-    obj = lua_newuserdata(L, size);    /* obj */
-    lua_createtable(L, 0, 4);          /* obj fenv */
-    luaL_getmetatable(L, tname);       /* obj fenv class */
-
-    assert(lua_istable(L, -1) /* tname was loaded */);
-
-    /* fenv.__gc = class.__gc */
-    lua_pushliteral(L, "__gc");        /* obj fenv class "__gc" */
-    lua_rawget(L, -2);                 /* obj fenv class __gc */
-    lua_setfield(L, -3, "__gc");       /* obj fenv class */
-    /* fenv.class = class */
-    lua_pushvalue(L, -1);              /* obj fenv class class */
-    lua_setfield(L, -3, "class");      /* obj fenv class */
-    /* fenv.__index = class */
-    lua_setfield(L, -2, "__index");    /* obj fenv */
-    /* fenv.__newindex = obj_lazy_newindex */
-    lua_pushcfunction(L, obj_lazy_newindex); /* obj fenv obj_lazy_newindex */
-    lua_setfield(L, -2, "__newindex"); /* obj fenv */
-    /* setfenv(obj, fenv) */
-    lua_pushvalue(L, -1);              /* obj fenv fenv */
-    lua_setfenv(L, -3);                /* obj fenv */
-    /* setmetatable(obj, fenv) */
-    lua_setmetatable(L, -2);           /* obj */
+    lua_createtable(L, 1, 0);
+    result = lua_setfenv(L, -2);
+    assert(result == 1 /* setfenv() was successful */);
 
     return obj;
 }
 
 /**
- * Lazily create a shadow table for an object, set the desired value,
- * and redirect the object's metatable to use it directly from now on.
+ * Lazily create the shadow table, and provide write access to this
+ * shadow table.
  *
  * [-0, +0, ?]
  */
-static int obj_lazy_newindex(lua_State *L)
-{
-    /*
-     * fenv = getmetatable(obj)
-     * shadow = { [key] = value }
-     * setmetatable(shadow, fenv.__index)
-     * fenv.__index = shadow
-     * fenv.__newindex = shadow
-     */
-    lua_getmetatable(L, 1);            /* fenv */
-    lua_createtable(L, 0, 1);          /* fenv shadow */
-    /* shadow[key] = value */
-    lua_pushvalue(L, 2);               /* fenv shadow key */
-    lua_pushvalue(L, 3);               /* fenv shadow key value */
-    lua_rawset(L, -3);                 /* fenv shadow */
-    /* setmetatable(shadow, fenv.__index) */
-    lua_getfield(L, -2, "__index");    /* fenv shadow class */
-    lua_setmetatable(L, -2);           /* fenv shadow */
-    /* fenv.__index = shadow; fenv.__newindex = shadow */
-    lua_pushvalue(L, -1);              /* fenv shadow shadow */
-    lua_setfield(L, -3, "__index");    /* fenv shadow */
-    lua_setfield(L, -2, "__newindex"); /* fenv */
+static int obj_newindex(lua_State *L) {
+    lua_getfenv(L, 1);
+    lua_rawgeti(L, -1, WATCHER_SHADOW);
+
+    /* fenv, shadow */
+    if ( lua_isnil(L, -1) ) {
+        /* Lazily create the shadow table: */
+        lua_pop(L, 1);
+        lua_newtable(L);
+        lua_pushvalue(L, -1);
+        lua_rawseti(L, -3, WATCHER_SHADOW);
+    }
+
+    /* h(table, key,value) */
+    lua_replace(L, 1);
+    lua_settop(L, 3);
+    lua_settable(L, 1);
     return 0;
 }
 
 /**
- * Checks that "object" has a metatable ancestor of tname.
+ * Provide read access to the shadow table.
  *
- * [-0, +0, ?]
+ * [-0, +1, ?]
  */
-static void *obj_check(lua_State *L, int obj_i, const char *tname) {
-    void *udata = lua_touserdata(L, obj_i);
-    luaL_getmetatable(L, tname);
-    if (udata && lua_getmetatable(L, obj_i)) {
-        lua_pushliteral(L, "class");
-        lua_rawget(L, -2);
-        while (1) {
-            if (lua_rawequal(L, -1, -3)) {
-                lua_pop(L, 3);
-                return udata;
-            } else {
-                if (!lua_getmetatable(L, -1))
-                    break;
-                lua_remove(L, -2);
-            }
-        }
-    }
-    luaL_typerror(L, obj_i, tname);
-    return NULL; /* not reached */
+static int obj_index(lua_State *L) {
+    lua_getfenv(L, 1);
+    lua_rawgeti(L, -1, WATCHER_SHADOW);
+
+    if ( lua_isnil(L, -1) ) return 1;
+
+    lua_pushvalue(L, 2);
+    lua_gettable(L, -1);
+    return 1;
 }
 
 /**
@@ -160,16 +127,6 @@ static void register_obj(lua_State*L, int obj_i, void* obj) {
     lua_rawset(L,            -3);
     lua_pop(L,               1);
 }
-
-#if 0
-/**
- * Simply calls push_objs() with a single object.
- */
-static int push_obj(lua_State* L, void* obj) {
-    void* objs[2] = { obj, NULL };
-    return push_objs(L, objs);
-}
-#endif
 
 /**
  * Pushes the lua representation of n objects onto the stack.  The

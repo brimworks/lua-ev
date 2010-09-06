@@ -204,7 +204,8 @@ loop:fork()
 loop:loop()
 
     Run the event loop!  Returns when there are no more watchers
-    registered with the event loop.
+    registered with the event loop.  See special note below about
+    calling ev_loop() C API.
 
     See also ev_loop() C function.
 
@@ -373,12 +374,29 @@ EXCEPTION HANDLING NOTE:
    actually handles the exception.  If the error handling stack
    unwinds, we will probably just resort to printing to stderr.
 
-IMPROVEMENT NOTE:
+CALLING ev_loop() C API DIRECTLY:
 
-   You can now call ev_loop() directly from the C API (in the past
-   there was assumptions in the callback implementation).
+   If you want to call the ev_loop() C API directly, then you *must*
+   set the loop userdata field to the lua_State in which you want all
+   callbacks to be ran in.  In the past, the lua_State was stored as
+   a thread local which was set when loop:loop() lua function is
+   called, but this made lua-ev dependent upon pthreads and forced
+   ev_loop() to only be called from lua.  Next, I removed the pthreads
+   dependency and stored the lua_State in which the callback was
+   registered.  This doesn't bode well when working with coroutines as
+   it means that loop:loop() may call back into a coroutine that is
+   long gone.
+
+   The current implementation relies on libev 3.7's ability to set a
+   userdata field associated with an event loop, and the loop:loop()
+   implementation simply sets the userdata field for the duration of
+   loop:loop().  This does mean that if you want to call ev_loop()
+   from C then you either need to be sure that no lua watchers are
+   registered with that loop, or you need to set the userdata field to
+   the lua_State* in which the callbacks should be ran.
 
 TODO:
 
-  * Add support for other watcher types (signals, stat, periodic,
-    child, idle, embed, async, etc).
+  * Add support for other watcher types (stat, periodic, child, embed,
+    async, etc).
+

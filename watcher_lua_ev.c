@@ -1,11 +1,15 @@
 #include <stdint.h>
 
+static const char* watcher_magic = "a string that is used"
+    " to mark a watcher";
+
 /**
- * Create the watcher metatable in the registry.
+ * Add watcher specific methods to the table on the top of the lua
+ * stack.
  *
- * [-0, +1, ?]
+ * [-0, +0, ?]
  */
-static int create_watcher_mt(lua_State *L) {
+static int add_watcher_mt(lua_State *L) {
 
     static luaL_reg fns[] = {
         { "is_active",     watcher_is_active },
@@ -13,14 +17,43 @@ static int create_watcher_mt(lua_State *L) {
         { "clear_pending", watcher_clear_pending },
         { "callback",      watcher_callback },
         { "priority",      watcher_priority },
+        { "__index",       obj_index },
+        { "__newindex",    obj_newindex },
         { NULL, NULL }
     };
-    luaL_newmetatable(L, WATCHER_MT);
     luaL_register(L, NULL, fns);
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
 
-    return 1;
+    /* Mark this as being a watcher: */
+    lua_pushliteral(L, "is_watcher__");
+    lua_pushlightuserdata(L, (void*)watcher_magic);
+    lua_rawset(L, -3);
+
+    return 0;
+}
+
+/**
+ * Checks that we have a watcher at watcher_i index by validating the
+ * metatable has the is_watcher__ field set to the watcher magic light
+ * userdata that is simply used to mark a metatable as being a
+ * "watcher".
+ *
+ * [-0, +0, ?]
+ */
+static struct ev_watcher* check_watcher(lua_State *L, int watcher_i) {
+    void *watcher = lua_touserdata(L, watcher_i);
+    if ( watcher != NULL ) { /* Got a userdata? */
+        if ( lua_getmetatable(L, watcher_i) ) { /* got a metatable? */
+            lua_getfield(L, -1, "is_watcher__");
+            lua_pushlightuserdata(L, (void*)watcher_magic);
+
+            if ( lua_rawequal(L, -1, -2) ) {
+                lua_pop(L, 3);
+                return (struct ev_watcher*)watcher;
+            }
+        }
+    }
+    luaL_typerror(L, watcher_i, "ev{io,timer,signal,idle}");
+    return NULL;
 }
 
 /**
@@ -65,7 +98,8 @@ static int watcher_clear_pending(lua_State *L) {
 
 /**
  * Implement the new function on all the watcher objects.  The first
- * element on the stack must be the callback function.
+ * element on the stack must be the callback function.  The new
+ * "watcher" is now at the top of the stack.
  *
  * [+1, -0, ?]
  */
@@ -158,7 +192,7 @@ static void watcher_cb(struct ev_loop *loop, void *watcher, int revents) {
 static int watcher_callback(lua_State *L) {
     int has_fn = lua_gettop(L) > 1;
 
-    obj_check(L, 1, WATCHER_MT);
+    check_watcher(L, 1);
     if ( has_fn ) luaL_checktype(L, 2, LUA_TFUNCTION);
 
     lua_getfenv(L, 1);
@@ -184,7 +218,7 @@ static int watcher_callback(lua_State *L) {
  */
 static int watcher_priority(lua_State *L) {
     int has_pri = lua_gettop(L) > 1;
-    ev_watcher *w = obj_check(L, 1, WATCHER_MT);
+    ev_watcher *w = check_watcher(L, 1);
     int old_pri = ev_priority(w);
 
     if ( has_pri ) ev_set_priority(w, luaL_checkint(L, 2));

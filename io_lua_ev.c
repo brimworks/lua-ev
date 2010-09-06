@@ -28,11 +28,11 @@ static int create_io_mt(lua_State *L) {
         { NULL, NULL }
     };
     luaL_newmetatable(L, IO_MT);
+    add_watcher_mt(L);
     luaL_register(L, NULL, fns);
+
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
-    luaL_getmetatable(L, WATCHER_MT);
-    lua_setmetatable(L, -2);
 
     return 1;
 }
