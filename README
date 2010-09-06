@@ -345,18 +345,18 @@ io:stop(loop)
 
 -- ev.Idle object methods --
 
-io:start(loop [, is_daemon])
+idle:start(loop [, is_daemon])
 
-    Start the idle in the specified event loop.  Optionally make this
-    watcher a "daemon" watcher which means that the event loop will
-    terminate even if this watcher has not triggered.
+    Start the idle watcher in the specified event loop.  Optionally
+    make this watcher a "daemon" watcher which means that the event
+    loop will terminate even if this watcher has not triggered.
 
-    See also ev_io_start() C function (document as ev_TYPE_start()).
+    See also ev_idle_start() C function (document as ev_TYPE_start()).
 
-io:stop(loop)
+idle:stop(loop)
 
-    Unregister this idle from the specified event loop.  Ensures that
-    the watcher is neither active nor pending.
+    Unregister this idle watcher from the specified event loop.
+    Ensures that the watcher is neither active nor pending.
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
 
