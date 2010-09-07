@@ -31,9 +31,6 @@ static int create_idle_mt(lua_State *L) {
     add_watcher_mt(L);
     luaL_register(L, NULL, fns);
 
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-
     return 1;
 }
 

@@ -99,13 +99,19 @@ static int obj_newindex(lua_State *L) {
  * [-0, +1, ?]
  */
 static int obj_index(lua_State *L) {
+    if ( lua_getmetatable(L, 1) ) {
+        lua_pushvalue(L, 2);
+        lua_gettable(L, -2);
+        if ( ! lua_isnil(L, -1) ) return 1;
+        lua_pop(L, 1);
+    }
     lua_getfenv(L, 1);
     lua_rawgeti(L, -1, WATCHER_SHADOW);
 
     if ( lua_isnil(L, -1) ) return 1;
 
     lua_pushvalue(L, 2);
-    lua_gettable(L, -1);
+    lua_gettable(L, -2);
     return 1;
 }
 

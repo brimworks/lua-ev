@@ -64,5 +64,18 @@ function test_priority()
    idle_daemon:stop(loop)
 end
 
+function test_shadow_table()
+   local idle = ev.Idle.new(
+      function(loop, idle, revents)
+         idle:stop(loop)
+         ok(idle.user_data == "foo", 'shadow table works in callback')
+      end)
+   idle:start(loop)
+   idle.user_data = "foo"
+   ok(idle.user_data == "foo", 'shadow table works')
+   loop:loop()
+end
+
 noleaks(test_basic, "test_basic")
 noleaks(test_priority, "test_priority")
+noleaks(test_shadow_table, "test_shadow_table")
