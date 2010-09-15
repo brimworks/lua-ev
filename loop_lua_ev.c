@@ -144,6 +144,14 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
     }
     lua_pop(L, 1);
 
+    if ( is_daemon == -1 ) {
+        /* Set is_daemon properly for -1 case. */
+        if ( current_is_daemon == -1 )
+            is_daemon = 0;
+        else
+            is_daemon = current_is_daemon;
+    }
+
     /* Currently not initialized, or daemon status change? */
     if ( -1 == current_is_daemon ||
          current_is_daemon ^ is_daemon )
