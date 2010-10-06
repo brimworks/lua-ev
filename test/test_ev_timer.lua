@@ -1,4 +1,4 @@
-print '1..17'
+print '1..20'
 
 local src_dir, build_dir = ...
 package.path  = src_dir .. "?.lua;" .. package.path
@@ -58,6 +58,23 @@ function test_daemon_true()
 
    -- TODO: Should we make it so timer3 is automatically stopped if it is never executed in the event loop?
    timer3:stop(loop)
+end
+
+-- Test again() method
+function test_again()
+   local timer1_count = 0
+   local timer1 = ev.Timer.new(
+      function(loop, timer)
+         timer1_count = timer1_count + 1
+         if timer1_count == 3 then
+            timer:stop(loop)
+         else
+            timer:again(loop, 0.1)
+         end
+      end, 0.1)
+   timer1:start(loop)
+   loop:loop()
+   ok(timer1_count == 3, 'timer1 called thrice')
 end
 
 -- Test stop(), start(), and is_active()
@@ -174,6 +191,7 @@ end
 
 noleaks(test_basic, "test_basic")
 noleaks(test_daemon_true, "test_daemon_true")
+noleaks(test_again, "test_again")
 noleaks(test_start_stop_active, "test_start_stop_active")
 noleaks(test_callback, "test_callback")
 noleaks(test_is_pending, "test_is_pending")
