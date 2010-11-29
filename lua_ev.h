@@ -151,6 +151,7 @@ static int               io_new(lua_State* L);
 static void              io_cb(struct ev_loop* loop, ev_io* io, int revents);
 static int               io_stop(lua_State *L);
 static int               io_start(lua_State *L);
+static int               io_getfd(lua_State *L);
 
 /**
  * Signal functions:

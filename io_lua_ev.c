@@ -25,6 +25,7 @@ static int create_io_mt(lua_State *L) {
     static luaL_reg fns[] = {
         { "stop",          io_stop },
         { "start",         io_start },
+        { "getfd" ,        io_getfd },
         { NULL, NULL }
     };
     luaL_newmetatable(L, IO_MT);
@@ -98,4 +99,19 @@ static int io_start(lua_State *L) {
     loop_start_watcher(L, 2, 1, is_daemon);
 
     return 0;
+}
+
+/**
+ * Returns the original file descriptor
+ * Usage:
+ * io:getfd ( )
+ *
+ * [+1, -0, e]
+ */
+static int io_getfd(lua_State *L) {
+    ev_io*       io  = check_io(L, 1);
+
+    lua_pushinteger ( L , io->fd );
+
+    return 1;
 }
