@@ -24,6 +24,7 @@ local function test_stdin()
    local io1 = ev.IO.new(
       function(loop, io, revents)
          ok(true, 'STDIN is writable')
+         ok(io:getfd() == 1, 'getfd() works')
          io:stop(loop)
       end, 1, ev.WRITE)
    io1:start(loop)

@@ -344,6 +344,10 @@ io:stop(loop)
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
 
+fd = io:getfd()
+
+    Returns the file descriptor associated with the IO object.
+
 -- ev.Idle object methods --
 
 idle:start(loop [, is_daemon])
