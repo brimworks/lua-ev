@@ -174,6 +174,34 @@ idle = ev.Idle.new(on_idle)
 
     See also ev_idle_init() C function.
 
+child = ev.Child.new(on_child, pid, trace)
+
+    Create a new child watcher that will call the on_child function
+    whenever SIGCHLD for registered pid is delivered.
+
+    When pid is set to 0 the watcher will fire for any pid.
+
+    When trace is false the watcher will be activated when the process
+    terminates. If it's true - it will additionally be activated when
+    the process is stopped or continued.
+
+    The returned child is an ev.Child object.  See below for the methods on
+    this object.
+
+    NOTE: You must explicitly register the idle with an event loop in
+    order for it to take effect.
+
+    The on_child function will be called with these arguments (return
+    values are ignored):
+
+    on_child(loop, child, revents)
+
+        The loop is the event loop for which the idle object is
+        registered, the child parameter is the ev.Child object, and
+        revents is ev.CHILD.
+
+    See also ev_child_init() C function.
+
 ev.READ (constant)
 
     If this bit is set, the io watcher is ready to read.  See also
@@ -193,6 +221,11 @@ ev.SIGNAL (constant)
 
    If this bit is set, the watcher was triggered by a signal.  See
    also EV_SIGNAL C definition.
+
+ev.CHILD (constant)
+
+   If this bit is set, the watcher was triggered by a child signal.
+   See also EV_CHILD C definition.
 
 -- ev.Loop object methods --
 
@@ -365,6 +398,52 @@ idle:stop(loop)
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
 
+-- ev.Child object methods --
+
+child:start(loop [, is_daemon])
+
+    Start the child watcher in the specified event loop.  Optionally
+    make this watcher a "daemon" watcher which means that the event
+    loop will terminate even if this watcher has not triggered.
+
+    See also ev_child_start() C function (document as ev_TYPE_start()).
+
+child:stop(loop)
+
+    Unregister this child watcher from the specified event loop.
+    Ensures that the watcher is neither active nor pending.
+
+    See also ev_child_stop() C function (document as ev_TYPE_stop()).
+
+child:getpid()
+
+    Return the process id this watcher watches out for, or 0, meaning
+    any process id.
+
+child:getrpid()
+
+    Return the process id that detected a status change.
+
+child:getstatus()
+
+    Returns the process exit/trace status caused by "rpid" (see your systems
+    "waitpid" and "sys/wait.h" for details).
+
+    It returns the table with the following fields:
+    - exited: true if status was returned for a child process that terminated
+      normally;
+    - stopped: true if status was returned for a child process that is
+      currently stopped;
+    - signaled: true if status was returned for a child process that terminated
+      due to receipt of a signal that was not caught;
+    - exit_status: (only if exited == true) the low-order 8 bits of the status
+      argument that the child process passed to _exit() or exit(), or the value
+      the child process returned from main();
+    - stop_signal: (only if stopped == true) the number of the signal that
+      caused the child process to stop;
+    - term_signal: (only if signaled == true) the number of the signal that
+      caused the termination of the child process.
+
 EXCEPTION HANDLING NOTE:
 
    If there is an exception when calling a watcher callback, the error
@@ -401,6 +480,6 @@ CALLING ev_loop() C API DIRECTLY:
 
 TODO:
 
-  * Add support for other watcher types (stat, periodic, child, embed,
+  * Add support for other watcher types (stat, periodic, embed,
     async, etc).
 

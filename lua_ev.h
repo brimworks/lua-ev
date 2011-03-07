@@ -22,6 +22,7 @@
 #define TIMER_MT   "ev{timer}"
 #define SIGNAL_MT  "ev{signal}"
 #define IDLE_MT    "ev{idle}"
+#define CHILD_MT   "ev{child}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -67,6 +68,9 @@
 
 #define check_idle(L, narg)                                      \
     ((struct ev_idle*)     luaL_checkudata((L), (narg), IDLE_MT))
+
+#define check_child(L, narg)                                      \
+    ((struct ev_child*)     luaL_checkudata((L), (narg), CHILD_MT))
 
 
 /**
@@ -172,3 +176,16 @@ static int               idle_new(lua_State* L);
 static void              idle_cb(struct ev_loop* loop, ev_idle* idle, int revents);
 static int               idle_stop(lua_State *L);
 static int               idle_start(lua_State *L);
+
+/**
+ * Child functions:
+ */
+static int               luaopen_ev_child(lua_State *L);
+static int               create_child_mt(lua_State *L);
+static int               child_new(lua_State* L);
+static void              child_cb(struct ev_loop* loop, ev_child* sig, int revents);
+static int               child_stop(lua_State *L);
+static int               child_start(lua_State *L);
+static int               child_getpid(lua_State *L);
+static int               child_getrpid(lua_State *L);
+static int               child_getstatus(lua_State *L);
