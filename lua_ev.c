@@ -15,6 +15,12 @@
 #include "signal_lua_ev.c"
 #include "idle_lua_ev.c"
 
+static const luaL_reg R[] = {
+    {"version", version},
+    {"object_count", obj_count},
+    {NULL, NULL},
+};
+
 /**
  * Entry point into the 'ev' lua library.  Validates that the
  * dynamically linked libev version matches, creates the object
@@ -27,7 +33,7 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     create_obj_registry(L);
 
-    lua_createtable(L, 0, 14);
+    luaL_register(L, "ev", R);
 
     luaopen_ev_loop(L);
     lua_setfield(L, -2, "Loop");
@@ -43,12 +49,6 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     luaopen_ev_idle(L);
     lua_setfield(L, -2, "Idle");
-
-    lua_pushcfunction(L, version);
-    lua_setfield(L, -2, "version");
-
-    lua_pushcfunction(L, obj_count);
-    lua_setfield(L, -2, "object_count");
 
     lua_pushnumber(L, EV_READ);
     lua_setfield(L, -2, "READ");
