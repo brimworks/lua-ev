@@ -23,6 +23,7 @@
 #define SIGNAL_MT  "ev{signal}"
 #define IDLE_MT    "ev{idle}"
 #define CHILD_MT   "ev{child}"
+#define STAT_MT    "ev{stat}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -71,6 +72,9 @@
 
 #define check_child(L, narg)                                      \
     ((struct ev_child*)     luaL_checkudata((L), (narg), CHILD_MT))
+
+#define check_stat(L, narg)                                      \
+    ((struct ev_stat*)     luaL_checkudata((L), (narg), STAT_MT))
 
 
 /**
@@ -189,3 +193,15 @@ static int               child_start(lua_State *L);
 static int               child_getpid(lua_State *L);
 static int               child_getrpid(lua_State *L);
 static int               child_getstatus(lua_State *L);
+
+/**
+ * Stat functions:
+ */
+static int               luaopen_ev_stat(lua_State *L);
+static int               create_stat_mt(lua_State *L);
+static int               stat_new(lua_State* L);
+static void              stat_cb(struct ev_loop* loop, ev_stat* sig, int revents);
+static int               stat_stop(lua_State *L);
+static int               stat_start(lua_State *L);
+static int               stat_start(lua_State *L);
+static int               stat_getdata(lua_State *L);

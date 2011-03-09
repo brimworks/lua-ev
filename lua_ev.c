@@ -15,6 +15,7 @@
 #include "signal_lua_ev.c"
 #include "idle_lua_ev.c"
 #include "child_lua_ev.c"
+#include "stat_lua_ev.c"
 
 static const luaL_reg R[] = {
     {"version", version},
@@ -54,6 +55,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     luaopen_ev_child(L);
     lua_setfield(L, -2, "Child");
 
+    luaopen_ev_stat(L);
+    lua_setfield(L, -2, "Stat");
+
     lua_pushnumber(L, EV_READ);
     lua_setfield(L, -2, "READ");
 
@@ -71,6 +75,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     lua_pushnumber(L, EV_CHILD);
     lua_setfield(L, -2, "CHILD");
+
+    lua_pushnumber(L, EV_STAT);
+    lua_setfield(L, -2, "STAT");
 
     lua_pushnumber(L, EV_MINPRI);
     lua_setfield(L, -2, "MINPRI");
