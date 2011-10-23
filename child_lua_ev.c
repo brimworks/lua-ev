@@ -1,4 +1,6 @@
+#ifndef _WIN32
 #include <sys/wait.h>
+#endif
 
 #define luaL_checkbool(L, i) (lua_isboolean(L, i) ? lua_toboolean(L, i) : luaL_checkint(L, i))
 
@@ -139,34 +141,8 @@ static int child_getrpid(lua_State *L) {
     return 1;
 }
 
-/**
- * Returns the process exit/trace status caused by "rpid" (see your systems
- * "waitpid" and "sys/wait.h" for details).
- * Usage:
- *     child:getstatus()
- *
- * It returns the table with the following fields:
- * - exited: true if status was returned for a child process that terminated
- *   normally;
- * - stopped: true if status was returned for a child process that is currently
- *   stopped;
- * - signaled: true if status was returned for a child process that terminated
- *   due to receipt of a signal that was not caught;
- * - exit_status: (only if exited == true) the low-order 8 bits of the status
- *   argument that the child process passed to _exit() or exit(), or the value
- *   the child process returned from main();
- * - stop_signal: (only if stopped == true) the number of the signal that
- *   caused the child process to stop;
- * - term_signal: (only if signaled == true) the number of the signal that 
- *   caused the termination of the child process.
- *
- * [+1, -0, e]
- */
-static int child_getstatus(lua_State *L) {
-    ev_child*       child  = check_child(L, 1);
+static void populate_child_status_table(ev_child *child, lua_State *L) {
     int             exited, stopped, signaled;
-
-    lua_newtable(L);
 
     exited = WIFEXITED(child->rstatus);
     stopped = WIFSTOPPED(child->rstatus);
@@ -205,6 +181,38 @@ static int child_getstatus(lua_State *L) {
         lua_pushinteger(L, WTERMSIG(child->rstatus));
         lua_settable(L, -3);
     }
+}
+
+/**
+ * Returns the process exit/trace status caused by "rpid" (see your systems
+ * "waitpid" and "sys/wait.h" for details).
+ * Usage:
+ *     child:getstatus()
+ *
+ * It returns the table with the following fields:
+ * - exited: true if status was returned for a child process that terminated
+ *   normally;
+ * - stopped: true if status was returned for a child process that is currently
+ *   stopped;
+ * - signaled: true if status was returned for a child process that terminated
+ *   due to receipt of a signal that was not caught;
+ * - exit_status: (only if exited == true) the low-order 8 bits of the status
+ *   argument that the child process passed to _exit() or exit(), or the value
+ *   the child process returned from main();
+ * - stop_signal: (only if stopped == true) the number of the signal that
+ *   caused the child process to stop;
+ * - term_signal: (only if signaled == true) the number of the signal that 
+ *   caused the termination of the child process.
+ *
+ * [+1, -0, e]
+ */
+static int child_getstatus(lua_State *L) {
+    ev_child*       child  = check_child(L, 1);
+
+    lua_newtable(L);
+#ifndef _WIN32
+    populate_child_status_table(child, L);
+#endif
 
     return 1;
 }
