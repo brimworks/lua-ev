@@ -130,9 +130,9 @@ static void* watcher_new(lua_State* L, size_t size, const char* lua_type) {
  * [+0, -0, m]
  */
 static void watcher_cb(struct ev_loop *loop, void *watcher, int revents) {
-    lua_State* L       = ev_userdata(loop);
-    void*      objs[3] = { loop, watcher, NULL };
-    int        result;
+    lua_State*  L       = ((ev_watcher *) watcher)->data;
+    void*       objs[3] = { loop, watcher, NULL };
+    int         result;
 
     lua_pushcfunction(L, traceback);
 

@@ -102,7 +102,7 @@ static struct ev_loop**  loop_alloc(lua_State *L);
 static struct ev_loop**  check_loop_and_init(lua_State *L, int loop_i);
 static int               loop_new(lua_State *L);
 static int               loop_delete(lua_State *L);
-static void              loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_daemon);
+static void              loop_start_watcher(lua_State* L, void *watcher, int loop_i, int watcher_i, int is_daemon);
 static void              loop_stop_watcher(lua_State* L, int loop_i, int watcher_i);
 static int               loop_is_default(lua_State *L);
 static int               loop_iteration(lua_State *L);
