@@ -62,7 +62,7 @@ WARNING:
 
 NOTE:
 
-  If you are new to even loop programming, take a look at example.lua
+  If you are new to event loop programming, take a look at example.lua
 
 -- ev functions --
 
