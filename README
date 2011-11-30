@@ -60,6 +60,10 @@ WARNING:
   your event loop(s) in the child process.  You can do this
   re-initialization using the loop:fork() function.
 
+NOTE:
+
+  If you are new to even loop programming, take a look at example.lua
+
 -- ev functions --
 
 major, minor = ev.version()
