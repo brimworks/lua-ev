@@ -24,6 +24,7 @@
 #define IDLE_MT    "ev{idle}"
 #define CHILD_MT   "ev{child}"
 #define STAT_MT    "ev{stat}"
+#define ASYNC_MT   "ev{async}"
 
 /**
  * Special token to represent the uninitialized default loop.  This is
@@ -76,6 +77,8 @@
 #define check_stat(L, narg)                                      \
     ((struct ev_stat*)     luaL_checkudata((L), (narg), STAT_MT))
 
+#define check_async(L, narg)                                      \
+    ((struct ev_async*)     luaL_checkudata((L), (narg), ASYNC_MT))
 
 /**
  * Copied from the lua source code lauxlib.c.  It simply converts a
@@ -205,3 +208,14 @@ static int               stat_stop(lua_State *L);
 static int               stat_start(lua_State *L);
 static int               stat_start(lua_State *L);
 static int               stat_getdata(lua_State *L);
+
+/**
+ * Async functions:
+ */
+static int               luaopen_ev_stat(lua_State *L);
+static int               create_async_mt(lua_State *L);
+static int               async_new(lua_State* L);
+static void              async_cb(struct ev_loop* loop, ev_async* async, int revents);
+static int               async_stop(lua_State *L);
+static int               async_start(lua_State *L);
+static int               async_trigger(lua_State *L);
