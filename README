@@ -230,6 +230,28 @@ stat = ev.Stat.new(on_stat, path [, interval])
 
     See also ev_stat_init() C function.
 
+async = ev.Async.new(on_async)
+
+    Configures the watcher to wait for an async event from another loop,
+    thread or watcher.
+
+    The returned async is an ev.Async object. See below for the methods on
+    this object.
+
+    NOTE: You must explicitly register the async with an event loop in
+    order for it to take effect.
+
+    The on_async function will be called with these arguments (return
+    values are ignored):
+
+    on_async(loop, async, revents)
+
+        The loop is the event loop for which the idle object is
+        registered, the async parameter is the ev.Async object, and
+        revents is ev.ASYNC.
+
+    See also ev_async_init() C function.
+
 ev.READ (constant)
 
     If this bit is set, the io watcher is ready to read.  See also
@@ -259,6 +281,11 @@ ev.STAT (constant)
 
    If this bit is set, the watcher was triggered by a change in
    attributes of the file system path. See also EV_STAT C definition.
+
+ev.ASYNC (constant)
+
+   If this bit is set, the watcher was triggered by an async event.
+   See also EV_ASYNC C definition.
 
 -- ev.Loop object methods --
 
@@ -506,6 +533,30 @@ stat:getdata()
     * - prev: the previous attributes of the file with the same fields as
     *   attr fields.
 
+-- ev.Async object methods --
+
+async:start(loop [, is_daemon])
+
+    Start the async watcher in the specified event loop.  Optionally
+    make this watcher a "daemon" watcher which means that the event
+    loop will terminate even if this watcher has not triggered.
+
+    See also ev_async_start() C function (document as ev_TYPE_start()).
+
+async:stop(loop)
+
+    Unregister this async watcher from the specified event loop.
+    Ensures that the watcher is neither active nor pending.
+
+    See also ev_async_stop() C function (document as ev_TYPE_stop()).
+
+async:trigger(loop)
+
+    Trigger this async watcher for the specified loop. This will
+    make the on_async callback be triggered.
+
+    See also ev_async_send() C function.
+
 EXCEPTION HANDLING NOTE:
 
    If there is an exception when calling a watcher callback, the error
@@ -542,5 +593,5 @@ CALLING ev_loop() C API DIRECTLY:
 
 TODO:
 
-  * Add support for other watcher types (periodic, embed, async, etc).
+  * Add support for other watcher types (periodic, embed, etc).
 
