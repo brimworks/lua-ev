@@ -20,7 +20,7 @@ function spawn(cmd)
 
     fork:types('int')
     exec:types('int', 'string', 'string', 'string', 'string', 'string')
-    
+
     local pid = fork()
 
     if (pid == 0) then

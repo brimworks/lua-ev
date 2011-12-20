@@ -201,7 +201,7 @@ static void populate_child_status_table(ev_child *child, lua_State *L) {
  *   the child process returned from main();
  * - stop_signal: (only if stopped == true) the number of the signal that
  *   caused the child process to stop;
- * - term_signal: (only if signaled == true) the number of the signal that 
+ * - term_signal: (only if signaled == true) the number of the signal that
  *   caused the termination of the child process.
  *
  * [+1, -0, e]
