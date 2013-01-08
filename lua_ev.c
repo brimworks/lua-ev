@@ -2,6 +2,7 @@
 #include <ev.h>
 #include <lauxlib.h>
 #include <lua.h>
+#include <signal.h>
 
 #include "lua_ev.h"
 
@@ -84,6 +85,99 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     lua_pushnumber(L, EV_MAXPRI);
     lua_setfield(L, -2, "MAXPRI");
+
+    lua_pushnumber(L, SIGHUP);
+    lua_setfield(L, -2, "SIGHUP");
+
+    lua_pushnumber(L, SIGINT);
+    lua_setfield(L, -2, "SIGINT");    
+
+    lua_pushnumber(L, SIGQUIT);
+    lua_setfield(L, -2, "SIGQUIT");    
+
+    lua_pushnumber(L, SIGILL);
+    lua_setfield(L, -2, "SIGILL");    
+
+    lua_pushnumber(L, SIGTRAP);
+    lua_setfield(L, -2, "SIGTRAP");    
+
+    lua_pushnumber(L, SIGABRT);
+    lua_setfield(L, -2, "SIGABRT");    
+
+    lua_pushnumber(L, SIGIOT);
+    lua_setfield(L, -2, "SIGIOT");    
+
+    lua_pushnumber(L, SIGBUS);
+    lua_setfield(L, -2, "SIGBUS");    
+
+    lua_pushnumber(L, SIGFPE);
+    lua_setfield(L, -2, "SIGFPE");    
+
+    lua_pushnumber(L, SIGUSR1);
+    lua_setfield(L, -2, "SIGUSR1");
+
+    lua_pushnumber(L, SIGSEGV);
+    lua_setfield(L, -2, "SIGSEGV");    
+
+    lua_pushnumber(L, SIGUSR2);
+    lua_setfield(L, -2, "SIGUSR2");    
+
+    lua_pushnumber(L, SIGPIPE);
+    lua_setfield(L, -2, "SIGPIPE");    
+
+    lua_pushnumber(L, SIGALRM);
+    lua_setfield(L, -2, "SIGALRM");    
+
+    lua_pushnumber(L, SIGTERM);
+    lua_setfield(L, -2, "SIGTERM");    
+
+    lua_pushnumber(L, SIGSTKFLT);
+    lua_setfield(L, -2, "SIGSTKFLT");    
+
+    lua_pushnumber(L, SIGCHLD);
+    lua_setfield(L, -2, "SIGCHLD");    
+
+    lua_pushnumber(L, SIGCONT);
+    lua_setfield(L, -2, "SIGCONT");    
+
+    lua_pushnumber(L, SIGTSTP);
+    lua_setfield(L, -2, "SIGTSTP");    
+
+    lua_pushnumber(L, SIGTTIN);
+    lua_setfield(L, -2, "SIGTTIN");    
+
+    lua_pushnumber(L, SIGTTOU);
+    lua_setfield(L, -2, "SIGTTOU");    
+
+    lua_pushnumber(L, SIGURG);
+    lua_setfield(L, -2, "SIGURG");    
+
+    lua_pushnumber(L, SIGXCPU);
+    lua_setfield(L, -2, "SIGXCPU");    
+
+    lua_pushnumber(L, SIGXFSZ);
+    lua_setfield(L, -2, "SIGXFSZ");    
+
+    lua_pushnumber(L, SIGVTALRM);
+    lua_setfield(L, -2, "SIGVTALRM");    
+
+    lua_pushnumber(L, SIGPROF);
+    lua_setfield(L, -2, "SIGPROF");    
+
+    lua_pushnumber(L, SIGWINCH);
+    lua_setfield(L, -2, "SIGWINCH");    
+
+    lua_pushnumber(L, SIGIO);
+    lua_setfield(L, -2, "SIGIO");    
+
+    lua_pushnumber(L, SIGPOLL);
+    lua_setfield(L, -2, "SIGPOLL");    
+
+    lua_pushnumber(L, SIGPWR);
+    lua_setfield(L, -2, "SIGPWR");    
+
+    lua_pushnumber(L, SIGSYS);
+    lua_setfield(L, -2, "SIGSYS");    
 
     return 1;
 }
