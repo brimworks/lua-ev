@@ -22,14 +22,18 @@ static int luaopen_ev_signal(lua_State *L) {
  */
 static int create_signal_mt(lua_State *L) {
 
-    static luaL_reg fns[] = {
+    static luaL_Reg fns[] = {
         { "stop",          signal_stop },
         { "start",         signal_start },
         { NULL, NULL }
     };
     luaL_newmetatable(L, SIGNAL_MT);
     add_watcher_mt(L);
+#if LUA_VERSION_NUM > 501
+    luaL_setfuncs(L, fns, 0);
+#else
     luaL_register(L, NULL, fns);
+#endif
 
     return 1;
 }

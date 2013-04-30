@@ -29,7 +29,7 @@ local function dump_impl(input, output, path, indent, done)
    else
       table.insert(output, "[")
       table.insert(output, tostring(input))
-      table.insert(output, "\]");
+      table.insert(output, "]");
    end
 end
 
