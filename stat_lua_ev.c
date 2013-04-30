@@ -22,7 +22,7 @@ static int luaopen_ev_stat(lua_State *L) {
  */
 static int create_stat_mt(lua_State *L) {
 
-    static luaL_reg fns[] = {
+    static luaL_Reg fns[] = {
         { "stop",          stat_stop },
         { "start",         stat_start },
         { "getdata",       stat_getdata },
@@ -30,7 +30,11 @@ static int create_stat_mt(lua_State *L) {
     };
     luaL_newmetatable(L, STAT_MT);
     add_watcher_mt(L);
+#if LUA_VERSION_NUM > 501
+    luaL_setfuncs(L, fns, 0);
+#else
     luaL_register(L, NULL, fns);
+#endif
 
     return 1;
 }

@@ -27,7 +27,7 @@ static int luaopen_ev_child(lua_State *L) {
  * [-0, +1, ?]
  */
 static int create_child_mt(lua_State *L) {
-    static luaL_reg fns[] = {
+    static luaL_Reg fns[] = {
         { "stop",          child_stop },
         { "start",         child_start },
         { "getpid" ,       child_getpid },
@@ -37,7 +37,11 @@ static int create_child_mt(lua_State *L) {
     };
     luaL_newmetatable(L, CHILD_MT);
     add_watcher_mt(L);
+#if LUA_VERSION_NUM > 501
+    luaL_setfuncs(L, fns, 0);
+#else
     luaL_register(L, NULL, fns);
+#endif
 
     return 1;
 }
