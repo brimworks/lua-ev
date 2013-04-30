@@ -14,6 +14,8 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
   SET(INSTALL_CMOD share/lua/cmod CACHE PATH "Directory to install Lua binary modules (configure lua via LUA_CPATH)")
 # / configs
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Find libev
   FIND_LIBRARY (LIBEV_LIBRARY NAMES ev)
   FIND_PATH (LIBEV_INCLUDE_DIR ev.h
@@ -24,7 +26,7 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 # / Find libarchive
 
 # Find lua
-  FIND_PACKAGE(Lua51 REQUIRED)
+  FIND_PACKAGE(Lua52 REQUIRED)
 # / Find lua
 
 # Define how to build ev.so:

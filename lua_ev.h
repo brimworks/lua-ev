@@ -82,9 +82,13 @@
  * negative stack index into a positive one so that if the stack later
  * grows or shrinks, the index will not be effected.
  */
-#define abs_index(L, i)                    \
-    ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? \
-     (i) : lua_gettop(L) + (i) + 1)
+#if LUA_VERSION_NUM > 501
+#    define abs_index(L, i) lua_absindex(L, i)
+#else
+#    define abs_index(L, i) \
+        ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? \
+        (i) : lua_gettop(L) + (i) + 1)
+#endif
 
 
 /**

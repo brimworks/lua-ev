@@ -11,7 +11,7 @@ static void create_obj_registry(lua_State *L) {
     lua_newtable(L);
 
     lua_createtable(L,  0, 1);
-    lua_pushstring(L,   "v");
+    lua_pushliteral(L,   "v");
     lua_setfield(L,     -2, "__mode");
     lua_setmetatable(L, -2);
 
@@ -51,7 +51,6 @@ static int obj_count(lua_State *L) {
  */
 static void* obj_new(lua_State* L, size_t size, const char* tname) {
     void* obj;
-    int result;
 
     obj = lua_newuserdata(L, size);
     luaL_getmetatable(L,     tname);
@@ -61,8 +60,11 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
      * table:
      */
     lua_createtable(L, 1, 0);
-    result = lua_setfenv(L, -2);
-    assert(result == 1 /* setfenv() was successful */);
+#if LUA_VERSION_NUM > 501
+    lua_setuservalue(L, -2);
+#else
+    assert(lua_setfenv(L, -2) == 1); /* setfenv() was successful */
+#endif
 
     return obj;
 }
@@ -74,7 +76,11 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
  * [-0, +0, ?]
  */
 static int obj_newindex(lua_State *L) {
+#if LUA_VERSION_NUM > 501
+    lua_getuservalue(L, 1);
+#else
     lua_getfenv(L, 1);
+#endif
     lua_rawgeti(L, -1, WATCHER_SHADOW);
 
     /* fenv, shadow */
@@ -105,7 +111,11 @@ static int obj_index(lua_State *L) {
         if ( ! lua_isnil(L, -1) ) return 1;
         lua_pop(L, 1);
     }
+#if LUA_VERSION_NUM > 501
+    lua_getuservalue(L, 1);
+#else
     lua_getfenv(L, 1);
+#endif
     lua_rawgeti(L, -1, WATCHER_SHADOW);
 
     if ( lua_isnil(L, -1) ) return 1;

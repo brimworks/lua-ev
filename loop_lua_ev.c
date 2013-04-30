@@ -25,7 +25,7 @@ static int luaopen_ev_loop(lua_State *L) {
  */
 static int create_loop_mt(lua_State *L) {
 
-    static luaL_reg fns[] = {
+    static luaL_Reg fns[] = {
         { "is_default", loop_is_default },
         { "count",      loop_iteration }, /* old API */
         { "iteration",  loop_iteration },
@@ -40,7 +40,11 @@ static int create_loop_mt(lua_State *L) {
         { NULL, NULL }
     };
     luaL_newmetatable(L, LOOP_MT);
+#if LUA_VERSION_NUM > 501
+    luaL_setfuncs(L, fns, 0);
+#else
     luaL_register(L, NULL, fns);
+#endif
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
@@ -135,7 +139,11 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
     watcher_i = abs_index(L, watcher_i);
 
     /* Check that watcher isn't already registered: */
+#if LUA_VERSION_NUM > 501
+    lua_getuservalue(L, loop_i);
+#else
     lua_getfenv(L,     loop_i);
+#endif
     lua_pushvalue(L,   watcher_i);
     lua_rawget(L,      -2);
 
@@ -187,7 +195,11 @@ static void loop_stop_watcher(lua_State* L, int loop_i, int watcher_i) {
     loop_i    = abs_index(L, loop_i);
     watcher_i = abs_index(L, watcher_i);
 
+#if LUA_VERSION_NUM > 501
+    lua_getuservalue(L, loop_i);
+#else
     lua_getfenv(L,     loop_i);
+#endif
     lua_pushvalue(L,   watcher_i);
     lua_rawget(L,      -2);
 
