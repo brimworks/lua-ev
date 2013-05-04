@@ -15,9 +15,16 @@
 #endif
 
 #if LUA_VERSION_NUM <= 501
+
+/** Backwards compatibility shims: */
 #define lua_absindex(L, i)                              \
     ((i) > 0 || (i) <= LUA_REGISTRYINDEX ?              \
      (i) : lua_gettop(L) + (i) + 1)
+
+#define lua_setuservalue(L, i) lua_setfenv((L), (i))
+
+#define lua_getuservalue(L, i) lua_getfenv((L), (i))
+
 #endif
 
 /**

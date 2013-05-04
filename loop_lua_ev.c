@@ -139,11 +139,7 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
     watcher_i = lua_absindex(L, watcher_i);
 
     /* Check that watcher isn't already registered: */
-#if LUA_VERSION_NUM > 501
     lua_getuservalue(L, loop_i);
-#else
-    lua_getfenv(L,     loop_i);
-#endif
     lua_pushvalue(L,   watcher_i);
     lua_rawget(L,      -2);
 
@@ -195,11 +191,7 @@ static void loop_stop_watcher(lua_State* L, int loop_i, int watcher_i) {
     loop_i    = lua_absindex(L, loop_i);
     watcher_i = lua_absindex(L, watcher_i);
 
-#if LUA_VERSION_NUM > 501
     lua_getuservalue(L, loop_i);
-#else
-    lua_getfenv(L,     loop_i);
-#endif
     lua_pushvalue(L,   watcher_i);
     lua_rawget(L,      -2);
 

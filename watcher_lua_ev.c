@@ -115,11 +115,7 @@ static void* watcher_new(lua_State* L, size_t size, const char* lua_type) {
     obj = obj_new(L, size, lua_type);
     register_obj(L, -1, obj);
 
-#if LUA_VERSION_NUM > 501
     lua_getuservalue(L, -1);
-#else
-    lua_getfenv(L, -1);
-#endif
     lua_pushvalue(L, 1);
     lua_rawseti(L, -2, WATCHER_FN);
 
@@ -158,11 +154,7 @@ static void watcher_cb(struct ev_loop *loop, void *watcher, int revents) {
         loop_stop_watcher(L, -2, -1);
     }
 
-#if LUA_VERSION_NUM > 501
     lua_getuservalue(L, -1);
-#else
-    lua_getfenv(L, -1);
-#endif
     assert(lua_istable(L, -1) /* The watcher fenv was found */);
     lua_rawgeti(L, -1, WATCHER_FN);
     if ( lua_isnil(L, -1) ) {
@@ -205,11 +197,7 @@ static int watcher_callback(lua_State *L) {
     check_watcher(L, 1);
     if ( has_fn ) luaL_checktype(L, 2, LUA_TFUNCTION);
 
-#if LUA_VERSION_NUM > 501
     lua_getuservalue(L, 1);
-#else
-    lua_getfenv(L, 1);
-#endif
     assert(lua_istable(L, -1) /* getfenv of watcher worked */);
     lua_rawgeti(L, -1, WATCHER_FN);
     if ( has_fn ) {
