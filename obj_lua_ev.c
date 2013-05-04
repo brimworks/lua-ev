@@ -63,7 +63,7 @@ static void* obj_new(lua_State* L, size_t size, const char* tname) {
 #if LUA_VERSION_NUM > 501
     lua_setuservalue(L, -2);
 #else
-    assert(lua_setfenv(L, -2) == 1); /* setfenv() was successful */
+    lua_setfenv(L, -2);
 #endif
 
     return obj;
@@ -132,7 +132,7 @@ static int obj_index(lua_State *L) {
  * [-0, +0, ?]
  */
 static void register_obj(lua_State*L, int obj_i, void* obj) {
-    obj_i = abs_index(L, obj_i);
+    obj_i = lua_absindex(L, obj_i);
 
     lua_pushlightuserdata(L, &obj_registry);
     lua_rawget(L,            LUA_REGISTRYINDEX);

@@ -14,6 +14,12 @@
 #  warning lua-ev requires version 3.7 or newer of libev
 #endif
 
+#if LUA_VERSION_NUM <= 501
+#define lua_absindex(L, i)                              \
+    ((i) > 0 || (i) <= LUA_REGISTRYINDEX ?              \
+     (i) : lua_gettop(L) + (i) + 1)
+#endif
+
 /**
  * Define the names used for the metatables.
  */
@@ -75,20 +81,6 @@
 
 #define check_stat(L, narg)                                      \
     ((struct ev_stat*)     luaL_checkudata((L), (narg), STAT_MT))
-
-
-/**
- * Copied from the lua source code lauxlib.c.  It simply converts a
- * negative stack index into a positive one so that if the stack later
- * grows or shrinks, the index will not be effected.
- */
-#if LUA_VERSION_NUM > 501
-#    define abs_index(L, i) lua_absindex(L, i)
-#else
-#    define abs_index(L, i) \
-        ((i) > 0 || (i) <= LUA_REGISTRYINDEX ? \
-        (i) : lua_gettop(L) + (i) + 1)
-#endif
 
 
 /**

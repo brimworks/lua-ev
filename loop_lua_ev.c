@@ -135,8 +135,8 @@ static int loop_delete(lua_State *L) {
 static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_daemon) {
     int current_is_daemon = -1;
 
-    loop_i    = abs_index(L, loop_i);
-    watcher_i = abs_index(L, watcher_i);
+    loop_i    = lua_absindex(L, loop_i);
+    watcher_i = lua_absindex(L, watcher_i);
 
     /* Check that watcher isn't already registered: */
 #if LUA_VERSION_NUM > 501
@@ -192,8 +192,8 @@ static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_d
  * [-0, +0, m]
  */
 static void loop_stop_watcher(lua_State* L, int loop_i, int watcher_i) {
-    loop_i    = abs_index(L, loop_i);
-    watcher_i = abs_index(L, watcher_i);
+    loop_i    = lua_absindex(L, loop_i);
+    watcher_i = lua_absindex(L, watcher_i);
 
 #if LUA_VERSION_NUM > 501
     lua_getuservalue(L, loop_i);
