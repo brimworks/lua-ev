@@ -21,11 +21,7 @@ static int add_watcher_mt(lua_State *L) {
         { "__newindex",    obj_newindex },
         { NULL, NULL }
     };
-#if LUA_VERSION_NUM > 501
     luaL_setfuncs(L, fns, 0);
-#else
-    luaL_register(L, NULL, fns);
-#endif
 
     /* Mark this as being a watcher: */
     lua_pushliteral(L, "is_watcher__");

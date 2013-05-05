@@ -40,11 +40,7 @@ static int create_loop_mt(lua_State *L) {
         { NULL, NULL }
     };
     luaL_newmetatable(L, LOOP_MT);
-#if LUA_VERSION_NUM > 501
     luaL_setfuncs(L, fns, 0);
-#else
-    luaL_register(L, NULL, fns);
-#endif
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 

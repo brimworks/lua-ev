@@ -25,6 +25,9 @@
 
 #define lua_getuservalue(L, i) lua_getfenv((L), (i))
 
+/* NOTE: this only works if nups == 0! */
+#define luaL_setfuncs(L, fns, nups) luaL_register((L), NULL, (fns))
+
 #endif
 
 /**

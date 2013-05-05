@@ -37,11 +37,7 @@ static int create_child_mt(lua_State *L) {
     };
     luaL_newmetatable(L, CHILD_MT);
     add_watcher_mt(L);
-#if LUA_VERSION_NUM > 501
     luaL_setfuncs(L, fns, 0);
-#else
-    luaL_register(L, NULL, fns);
-#endif
 
     return 1;
 }
