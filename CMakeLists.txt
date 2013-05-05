@@ -26,7 +26,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # / Find libarchive
 
 # Find lua
-  FIND_PACKAGE(Lua52 REQUIRED)
+  FIND_PACKAGE(Lua5X REQUIRED)
 # / Find lua
 
 # Define how to build ev.so:

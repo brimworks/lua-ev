@@ -2,7 +2,7 @@
 find_path(LUA_INCLUDE_DIR lua.h
 	HINTS
 	$ENV{LUA_DIR}
-	PATH_SUFFIXES include/lua52 include/lua5.2 include/lua include
+	PATH_SUFFIXES include/lua52 include/lua5.2 include/lua include include/lua51 include/lua5.1
 	PATHS
 	~/Library/Frameworks
 	/Library/Frameworks
@@ -15,7 +15,7 @@ find_path(LUA_INCLUDE_DIR lua.h
 )
 
 find_library(LUA_LIBRARY
-	NAMES lua52 lua5.2 lua-5.2 lua
+	NAMES lua52 lua5.2 lua-5.2 lua lua51 lua5.1 luajit-5.1 luajit51 luajit5.1
 	HINTS
 	$ENV{LUA_DIR}
 	PATH_SUFFIXES lib64 lib
@@ -41,6 +41,6 @@ endif(LUA_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(Lua52 DEFAULT_MSG LUA_LIBRARIES LUA_INCLUDE_DIR)
+find_package_handle_standard_args(Lua5X DEFAULT_MSG LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
