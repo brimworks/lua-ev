@@ -7,33 +7,15 @@ local ev    = require("ev")
 local help  = require("help")
 local dump  = require("dumper").dump
 local ok    = tap.ok
-local alien = require("alien")
 
 local noleaks = help.collect_and_assert_no_watchers
 local loop    = ev.Loop.default
 
-function spawn(cmd)
-    local fork = alien.default.fork
-    local exec = alien.default.execl
-
-    cmd = cmd or 'echo -e ""'
-
-    fork:types('int')
-    exec:types('int', 'string', 'string', 'string', 'string', 'string')
-    
-    local pid = fork()
-
-    if (pid == 0) then
-        local ret = exec('/bin/sh', '/bin/sh', '-c', cmd, nil)
-        ok(not ret, 'shouldn\'t get here, ret: ' .. tostring(ret))
-    else
-        return pid
-    end
-end
-
 function test_basic()
     local pid
+    local child_called = false
     local child = ev.Child.new(function(loop, child, revents)
+        child_called = true
         local status = child:getstatus()
         ok(child:getrpid() == pid, 'got proper pid')
         ok(child:getpid() == 0, 'pid == 0')
@@ -44,9 +26,10 @@ function test_basic()
         child:stop(loop)
     end, 0, false)
     child:start(loop)
-    pid = spawn()
+    pid = io.popen("echo $$", "r"):read("*n")
     ok(pid > -1, 'fork successful')
     loop:loop()
+    ok(child_called, "child forked")
 end
 
 noleaks(test_basic, "test_basic")

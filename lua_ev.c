@@ -90,12 +90,18 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     EV_SETCONST(L, , SIGIOT);
     EV_SETCONST(L, , SIGKILL);
     EV_SETCONST(L, , SIGPIPE);
+#ifdef SIGPOLL
     EV_SETCONST(L, , SIGPOLL);
+#endif
     EV_SETCONST(L, , SIGPROF);
+#ifdef SIGPWR
     EV_SETCONST(L, , SIGPWR);
+#endif
     EV_SETCONST(L, , SIGQUIT);
     EV_SETCONST(L, , SIGSEGV);
+#ifdef SIGSTKFLT
     EV_SETCONST(L, , SIGSTKFLT);
+#endif
     EV_SETCONST(L, , SIGSYS);
     EV_SETCONST(L, , SIGTERM);
     EV_SETCONST(L, , SIGTRAP);
