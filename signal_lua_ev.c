@@ -44,7 +44,7 @@ static int create_signal_mt(lua_State *L) {
  * [+1, -0, ?]
  */
 static int signal_new(lua_State* L) {
-    int         signum = luaL_checkint(L, 2);
+    int         signum = (int)luaL_checkinteger(L, 2);
     ev_signal*  sig;
 
     sig = watcher_new(L, sizeof(ev_signal), SIGNAL_MT);

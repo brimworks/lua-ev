@@ -219,7 +219,7 @@ static int watcher_priority(lua_State *L) {
     ev_watcher *w = check_watcher(L, 1);
     int old_pri = ev_priority(w);
 
-    if ( has_pri ) ev_set_priority(w, luaL_checkint(L, 2));
+    if ( has_pri ) ev_set_priority(w, (int)luaL_checkinteger(L, 2));
     lua_pushinteger(L, old_pri);
     return 1;
 }

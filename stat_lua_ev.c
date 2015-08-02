@@ -47,7 +47,7 @@ static int create_stat_mt(lua_State *L) {
  */
 static int stat_new(lua_State* L) {
     const char* path = luaL_checkstring(L, 2);
-    ev_tstamp   interval = luaL_optint(L, 3, 0);
+    ev_tstamp   interval = (int)luaL_optinteger(L, 3, 0);
     ev_stat*    stat;
 
     stat = watcher_new(L, sizeof(ev_stat), STAT_MT);
