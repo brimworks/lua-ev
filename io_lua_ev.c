@@ -46,8 +46,13 @@ static int create_io_mt(lua_State *L) {
  * [+1, -0, ?]
  */
 static int io_new(lua_State* L) {
+#if LUA_VERSION_NUM > 502
     int     fd     = (int)luaL_checkinteger(L, 2);
     int     events = (int)luaL_checkinteger(L, 3);
+#else
+    int     fd     = luaL_checkint(L, 2);
+    int     events = luaL_checkint(L, 3);
+#endif
     ev_io*  io;
 
     io = watcher_new(L, sizeof(ev_io), IO_MT);

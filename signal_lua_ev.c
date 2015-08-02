@@ -44,7 +44,11 @@ static int create_signal_mt(lua_State *L) {
  * [+1, -0, ?]
  */
 static int signal_new(lua_State* L) {
+#if LUA_VERSION_NUM > 502
     int         signum = (int)luaL_checkinteger(L, 2);
+#else
+    int         signum = luaL_checkint(L, 2);
+#endif
     ev_signal*  sig;
 
     sig = watcher_new(L, sizeof(ev_signal), SIGNAL_MT);
