@@ -2,7 +2,7 @@
 find_path(LUA_INCLUDE_DIR lua.h
 	HINTS
 	$ENV{LUA_DIR}
-	PATH_SUFFIXES include/lua52 include/lua5.2 include/lua include include/lua51 include/lua5.1
+	PATH_SUFFIXES include include/lua include/lua53 include/lua5.3 include/lua52 include/lua5.2 include/lua51 include/lua5.1
 	PATHS
 	~/Library/Frameworks
 	/Library/Frameworks
@@ -15,7 +15,7 @@ find_path(LUA_INCLUDE_DIR lua.h
 )
 
 find_library(LUA_LIBRARY
-	NAMES lua52 lua5.2 lua-5.2 lua lua51 lua5.1 luajit-5.1 luajit51 luajit5.1
+	NAMES lua lua53 lua5.3 lua52 lua5.2 lua-5.2 lua51 lua5.1 luajit-5.1 luajit51 luajit5.1
 	HINTS
 	$ENV{LUA_DIR}
 	PATH_SUFFIXES lib64 lib

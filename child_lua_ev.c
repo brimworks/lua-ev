@@ -2,7 +2,11 @@
 #include <sys/wait.h>
 #endif
 
+#if LUA_VERSION_NUM > 502
+#define luaL_checkbool(L, i) (lua_isboolean(L, i) ? lua_toboolean(L, i) : (int)luaL_checkinteger(L, i))
+#else
 #define luaL_checkbool(L, i) (lua_isboolean(L, i) ? lua_toboolean(L, i) : luaL_checkint(L, i))
+#endif
 
 /**
  * Create a table for ev.CHILD that gives access to the constructor for
@@ -55,7 +59,11 @@ static int create_child_mt(lua_State *L) {
  * [+1, -0, ?]
  */
 static int child_new(lua_State* L) {
+#if LUA_VERSION_NUM > 502
+    int         pid = (int)luaL_checkinteger(L, 2);
+#else
     int         pid = luaL_checkint(L, 2);
+#endif
     int         trace = luaL_checkbool(L, 3);
     ev_child*   child;
 
