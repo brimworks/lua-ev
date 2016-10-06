@@ -96,7 +96,7 @@ static int timer_again(lua_State *L) {
 
     if ( timer->repeat ) {
         ev_timer_again(loop, timer);
-        loop_start_watcher(L, 2, 1, -1);
+        loop_start_watcher(L, timer, 2, 1, -1);
     } else {
         /* Just calling stop instead of again in case the symantics
          * change in libev */
@@ -139,7 +139,7 @@ static int timer_start(lua_State *L) {
     int is_daemon          = lua_toboolean(L, 3);
 
     ev_timer_start(loop, timer);
-    loop_start_watcher(L, 2, 1, is_daemon);
+    loop_start_watcher(L, timer, 2, 1, is_daemon);
 
     return 0;
 }

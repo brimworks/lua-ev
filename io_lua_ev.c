@@ -101,7 +101,7 @@ static int io_start(lua_State *L) {
     int is_daemon          = lua_toboolean(L, 3);
 
     ev_io_start(loop, io);
-    loop_start_watcher(L, 2, 1, is_daemon);
+    loop_start_watcher(L, io, 2, 1, is_daemon);
 
     return 0;
 }

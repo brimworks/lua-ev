@@ -128,8 +128,11 @@ static int loop_delete(lua_State *L) {
  *
  * [-0, +0, m]
  */
-static void loop_start_watcher(lua_State* L, int loop_i, int watcher_i, int is_daemon) {
+static void loop_start_watcher(lua_State* L, void *watcher, int loop_i, int watcher_i, int is_daemon) {
     int current_is_daemon = -1;
+    ev_watcher *watch = watcher;
+
+    watch->data = L;
 
     loop_i    = lua_absindex(L, loop_i);
     watcher_i = lua_absindex(L, watcher_i);
@@ -257,10 +260,7 @@ static int loop_update_now(lua_State *L) {
  */
 static int loop_loop(lua_State *L) {
     struct ev_loop *loop = *check_loop_and_init(L, 1);
-    void *old_userdata = ev_userdata(loop);
-    ev_set_userdata(loop, L);
     ev_loop(loop, 0);
-    ev_set_userdata(loop, old_userdata);
     return 0;
 }
 
