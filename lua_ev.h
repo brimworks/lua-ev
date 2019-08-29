@@ -35,6 +35,7 @@
  */
 #define LOOP_MT    "ev{loop}"
 #define IO_MT      "ev{io}"
+#define ASYNC_MT   "ev{async}"
 #define TIMER_MT   "ev{timer}"
 #define SIGNAL_MT  "ev{signal}"
 #define IDLE_MT    "ev{idle}"
@@ -79,6 +80,9 @@
 
 #define check_io(L, narg)                                        \
     ((struct ev_io*)       luaL_checkudata((L), (narg), IO_MT))
+
+#define check_async(L, narg)                                        \
+    ((struct ev_async*)    luaL_checkudata((L), (narg), ASYNC_MT))
 
 #define check_signal(L, narg)                                   \
     ((struct ev_signal*)   luaL_checkudata((L), (narg), SIGNAL_MT))
@@ -166,6 +170,16 @@ static void              io_cb(struct ev_loop* loop, ev_io* io, int revents);
 static int               io_stop(lua_State *L);
 static int               io_start(lua_State *L);
 static int               io_getfd(lua_State *L);
+
+/**
+ * Async functions:
+ */
+static int               luaopen_ev_async(lua_State *L);
+static int               create_async_mt(lua_State *L);
+static int               async_new(lua_State* L);
+static void              async_cb(struct ev_loop* loop, ev_async* async, int revents);
+static int               async_stop(lua_State *L);
+static int               async_start(lua_State *L);
 
 /**
  * Signal functions:

@@ -15,6 +15,7 @@
 #include "timer_lua_ev.c"
 #include "signal_lua_ev.c"
 #include "idle_lua_ev.c"
+#include "async_lua_ev.c"
 #include "child_lua_ev.c"
 #include "stat_lua_ev.c"
 
@@ -52,6 +53,9 @@ LUALIB_API int luaopen_ev(lua_State *L) {
     luaopen_ev_io(L);
     lua_setfield(L, -2, "IO");
 
+    luaopen_ev_async(L);
+    lua_setfield(L, -2, "Async");
+
     luaopen_ev_signal(L);
     lua_setfield(L, -2, "Signal");
 
@@ -70,6 +74,7 @@ LUALIB_API int luaopen_ev(lua_State *L) {
 
     EV_SETCONST(L, EV_, CHILD);
     EV_SETCONST(L, EV_, IDLE);
+    EV_SETCONST(L, EV_, ASYNC);
     EV_SETCONST(L, EV_, MINPRI);
     EV_SETCONST(L, EV_, MAXPRI);
     EV_SETCONST(L, EV_, READ);
