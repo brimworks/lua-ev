@@ -178,6 +178,30 @@ idle = ev.Idle.new(on_idle)
 
     See also ev_idle_init() C function.
 
+async = ev.Async.new(on_async)
+
+    Create a new async watcher that will call the on_async function
+    whenever an application calls ev_async_send() from another context
+    (this can be another thread or some other context which does not
+    control the loop this watcher lives on)
+
+    The returned async is an ev.Async object.  See below for the methods
+    on this object.
+
+    NOTE: You must explicitly register the async with an event loop in
+    order for it to take effect.
+
+    The on_async function will be called with these arguments (return
+    values are ignored):
+
+    on_async(loop, idle, revents)
+
+        The loop is the event loop for which the idle object is
+        registered, the idle parameter is the ev.Idle object, and
+        revents is ev.IDLE.
+
+    See also ev_idle_init() C function.
+
 child = ev.Child.new(on_child, pid, trace)
 
     Create a new child watcher that will call the on_child function
@@ -431,6 +455,23 @@ idle:stop(loop)
 
     See also ev_io_stop() C function (document as ev_TYPE_stop()).
 
+-- ev.Async object methods --
+
+async:start(loop [, is_daemon])
+
+    Start the async watcher in the specified event loop.  Optionally
+    make this watcher a "daemon" watcher which means that the event
+    loop will terminate even if this watcher has not triggered.
+
+    See also ev_async_start() C function (document as ev_TYPE_start()).
+
+async:stop(loop)
+
+    Unregister this async watcher from the specified event loop.
+    Ensures that the watcher is neither active nor pending.
+
+    See also ev_async_stop() C function (document as ev_TYPE_stop()).
+
 -- ev.Child object methods --
 
 child:start(loop [, is_daemon])
@@ -542,5 +583,5 @@ CALLING ev_loop() C API DIRECTLY:
 
 TODO:
 
-  * Add support for other watcher types (periodic, embed, async, etc).
+  * Add support for other watcher types (periodic, embed, etc).
 
