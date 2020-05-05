@@ -230,7 +230,7 @@ revents is ev.STAT.
 
 See also `ev_stat_init()` C function.
 
-`### v.READ (constant)
+### ev.READ (constant)
 
 If this bit is set, the io watcher is ready to read. See also
 `EV_READ` C definition.
