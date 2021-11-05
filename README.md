@@ -170,6 +170,8 @@ order for it to take effect.
 The on_async function will be called with these arguments (return
 values are ignored):
 
+For a LuaJIT/FFI helper about the use of ev_async_send() from another thread, see [contrib/ev-async.lua](contrib/ev-async.lua).
+
 ### on_async(loop, idle, revents)
 
 The loop is the event loop for which the idle object is
@@ -249,6 +251,11 @@ also `EV_TIMEOUT` C definition.
 
 If this bit is set, the watcher was triggered by a signal. See
 also `EV_SIGNAL` C definition.
+
+### ev.ASYNC (constant)
+
+If this bit is set, the watcher has been asynchronously notified. See also
+`EV_ASYNC` C definition.
 
 ### ev.CHILD (constant)
 
@@ -447,6 +454,13 @@ Unregister this async watcher from the specified event loop.
 Ensures that the watcher is neither active nor pending.
 
 See also `ev_async_stop()` C function (document as `ev_TYPE_stop()`).
+
+### async:send(loop)
+
+Sends/signals/activates the given "ev_async" watcher, that is, feeds an
+"EV_ASYNC" event on the watcher into the event loop, and instantly returns.
+
+See also `ev_async_send()` C function.
 
 ## ev.Child object methods
 

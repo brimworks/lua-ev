@@ -23,6 +23,7 @@ static int luaopen_ev_async(lua_State *L) {
 static int create_async_mt(lua_State *L) {
 
     static luaL_Reg fns[] = {
+        { "send",          async_send },
         { "stop",          async_stop },
         { "start",         async_start },
         { NULL, NULL }
@@ -57,6 +58,24 @@ static int async_new(lua_State* L) {
  */
 static void async_cb(struct ev_loop* loop, ev_async* async, int revents) {
     watcher_cb(loop, async, revents);
+}
+
+/**
+ * Sends/signals/activates the given "ev_async" watcher, that is, feeds an
+ * "EV_ASYNC" event on the watcher into the event loop, and instantly returns.
+ *
+ * Usage:
+ *     async:send(loop)
+ *
+ * [+0, -0, e]
+ */
+static int async_send(lua_State *L) {
+    ev_async*       async  = check_async(L, 1);
+    struct ev_loop* loop   = *check_loop_and_init(L, 2);
+
+    ev_async_send(loop, async);
+
+    return 0;
 }
 
 /**
