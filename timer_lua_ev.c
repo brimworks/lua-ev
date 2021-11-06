@@ -51,8 +51,6 @@ static int timer_new(lua_State* L) {
     ev_tstamp repeat = luaL_optnumber(L, 3, 0);
     ev_timer* timer;
 
-    if ( after <= 0.0 )
-        luaL_argerror(L, 2, "after must be greater than 0");
     if ( repeat < 0.0 )
         luaL_argerror(L, 3, "repeat must be greater than or equal to 0");
 
