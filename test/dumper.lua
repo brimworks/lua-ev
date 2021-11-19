@@ -1,6 +1,6 @@
-module(..., package.seeall)
+local dumper = {}
 
-local function dump_impl(input, output, path, indent, done)
+function dump_impl(input, output, path, indent, done)
    if nil == input then
       table.insert(output, "nil")
    elseif "table" == type(input) then
@@ -33,9 +33,11 @@ local function dump_impl(input, output, path, indent, done)
    end
 end
 
-function dump(name, input)
+function dumper.dump(name, input)
    local output = { tostring(name) }
    table.insert(output, " = ")
    dump_impl(input, output, name, 0, {})
    return table.concat(output)
 end
+
+return dumper

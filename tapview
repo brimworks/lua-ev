@@ -1,0 +1,195 @@
+#! /bin/sh
+# tapview - a TAP (Test Anything Protocol) viewer in pure POSIX shell
+#
+# Copyright by Eric S. Raymond
+#
+# This code is intended to be embedded in your project. The author
+# grants permission for it to be distributed under the prevailing
+# license of your project if you choose, provided that license is
+# OSD-compliant; otherwise the following SPDX tag incorporates a
+# license by reference.
+#
+# SPDX-License-Identifier: BSD-2-Clause
+#
+# This is version 1.1
+# A newer version may be available at https://gitlab.com/esr/tapview
+#
+# POSIX allows but does not mandate that -n suppresses emission of a
+# trailing newline in echo. Thus, some shell builtin echos don't do
+# that.  Cope gracefully.
+# shellcheck disable=SC2039
+if [ "$(echo -n "a"; echo "b")" = "ab" ]
+then
+    ECHO="echo"
+elif [ "$(/bin/echo -n "a"; /bin/echo "b")" = "ab" ]
+then
+    ECHO="/bin/echo"
+else
+    echo "tapview: bailing out, your echo lacks -n support."
+    exit 3
+fi
+
+OK="."
+FAIL="F"
+SKIP="s"
+TODO_NOT_OK="x"
+TODO_OK="u"
+
+ship_char() {
+    # shellcheck disable=SC2039
+    "${ECHO}" -n "$1"
+}
+
+ship_line() {
+    report="${report}${1}\n"
+}
+
+testcount=0
+failcount=0
+skipcount=0
+todocount=0
+test_before_plan=no
+test_after_plan=no
+expect=""
+status=0
+
+report=""
+IFS=""
+state=start
+while read -r line
+do
+    if expr "$line" : "Bail out!" >/dev/null
+    then
+	ship_line "$line"
+	status=2
+	break
+    fi
+    # Process a plan line
+    if expr "$line" : '1\.\.[0-9][0-9]*' >/dev/null
+    then
+	if [ "$expect" != "" ]
+	then
+	    if [ "${testcount}" -gt 0 ]
+	    then
+		echo ""
+	    fi
+	    ship_line "tapview: cannot have more than one plan line."
+	    echo "${report}"
+	    exit 1
+	fi
+	if expr "$line" : ".* *SKIP" >/dev/null || expr "$line" : ".* *skip" >/dev/null
+	then
+	    ship_line "$line"
+	    echo "${report}"
+	    exit 1	# Not specified in the standard whether this should exit 1 or 0
+	fi
+	expect=$(expr "$line" : '1\.\.\([0-9][0-9]*\)')
+	continue
+    fi
+    # Process an ok line
+    if expr "$line" : "ok" >/dev/null
+    then
+	testcount=$((testcount + 1))
+	if [ "$expect" = "" ]
+	then
+	    test_before_plan=yes
+	else
+	    test_after_plan=yes
+	fi
+	if expr "$line" : ".*# *TODO" >/dev/null || expr "$line" : ".*# *todo" >/dev/null
+	then
+	    ship_char ${TODO_OK}
+	    ship_line "$line"
+	    todocount=$((todocount + 1))
+	elif expr "$line" : ".*# *SKIP" >/dev/null || expr "$line" : ".*# *skip" >/dev/null
+	then
+	    ship_char ${SKIP}
+	    ship_line "$line"
+	    skipcount=$((skipcount + 1))
+	else
+	    ship_char ${OK}
+	fi
+	state=ok
+	continue
+    fi
+    # Process a not-ok line
+    if expr "$line" : "not ok" >/dev/null
+    then
+	testcount=$((testcount + 1))
+	if [ "$expect" = "" ]
+	then
+	    test_before_plan=yes
+	else
+	    test_after_plan=yes
+	fi
+	if expr "$line" : ".*# *SKIP" >/dev/null || expr "$line" : ".*# *skip" >/dev/null
+	then
+	    ship_char "${SKIP}"
+	    state=ok
+	    skipcount=$((skipcount + 1))
+	    continue
+	fi
+	if expr "$line" : ".*# *TODO" >/dev/null || expr "$line" : ".*# *todo" >/dev/null
+	then
+	    ship_char ${TODO_NOT_OK}
+	    state=ok
+	    todocount=$((todocount + 1))
+	    continue
+	fi
+	ship_char "${FAIL}"
+	ship_line "$line"
+	state=not_ok
+	failcount=$((failcount + 1))
+	status=1
+	continue
+    fi
+    # shellcheck disable=SC2166
+    if [ "${state}" = "yaml" ]
+    then
+	ship_line "$line"
+	if expr "$line" : '[ 	]*\.\.\.' >/dev/null
+	then
+	    state=ok
+	fi
+    elif expr "$line" : "[ 	]*---" >/dev/null
+    then
+	ship_line "$line"
+	state=yaml
+    fi
+done
+
+/bin/echo ""
+
+if [ -z "$expect" ]
+then
+    ship_line "Missing a plan."
+    status=1
+elif [ "$test_before_plan" = "yes" ] && [ "$test_after_plan" = "yes" ] 
+then
+    ship_line "A plan line may only be placed before or after all tests."
+    status=1
+elif [ "${expect}" -gt "${testcount}" ]
+then
+    ship_line "Expected ${expect} tests but only ${testcount} ran."
+    status=1
+elif [ "${expect}" -lt "${testcount}" ]
+then
+    ship_line "Expected ${expect} tests but ${testcount} ran."
+    status=1
+fi
+
+report="${report}${testcount} tests, ${failcount} failures"
+if [ "$todocount" != 0 ]
+then
+    report="${report}, ${todocount} TODOs"
+fi
+if [ "$skipcount" != 0 ]
+then
+    report="${report}, ${skipcount} SKIPs"
+fi
+
+echo "${report}."
+
+exit "${status}"
+
+# end

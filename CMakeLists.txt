@@ -47,6 +47,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules/")
   ADD_TEST(ev_timer ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_timer.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_idle ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_idle.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_signal ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_signal.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
+  ADD_TEST(ev_async ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_async.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_child ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_child.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   ADD_TEST(ev_stat ${LUA} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ev_stat.lua ${CMAKE_CURRENT_SOURCE_DIR}/test/ ${CMAKE_CURRENT_BINARY_DIR}/)
   SET_TESTS_PROPERTIES(ev_io ev_loop ev_timer ev_signal ev_idle ev_child ev_stat

@@ -178,6 +178,7 @@ static int               luaopen_ev_async(lua_State *L);
 static int               create_async_mt(lua_State *L);
 static int               async_new(lua_State* L);
 static void              async_cb(struct ev_loop* loop, ev_async* async, int revents);
+static int               async_send(lua_State *L);
 static int               async_stop(lua_State *L);
 static int               async_start(lua_State *L);
 

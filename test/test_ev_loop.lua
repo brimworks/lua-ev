@@ -1,3 +1,5 @@
+print '1..9'
+
 local src_dir, build_dir = ...
 package.path  = src_dir .. "?.lua;" .. package.path
 package.cpath = build_dir .. "?.so;" .. package.cpath
@@ -40,6 +42,8 @@ if HAVE_LOOP_DEPTH then
   num = ev.Loop.default:depth()
   ok(num == 0,
      "depth=" .. num)
+else
+   ok(true, 'skip HAVE_LOOP_DEPTH is not installed')
 end
 
 -- Shouldn't do anything:

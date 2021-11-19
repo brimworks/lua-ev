@@ -1,1 +1,3 @@
 .*.swp
+ev.so
+lua_ev.o

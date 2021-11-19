@@ -1,3 +1,5 @@
+print '1..8'
+
 local src_dir, build_dir = ...
 package.path  = src_dir .. "?.lua;" .. package.path
 package.cpath = build_dir .. "?.so;" .. package.cpath
