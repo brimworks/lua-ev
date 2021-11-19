@@ -1,4 +1,4 @@
-print '1..20'
+print '1..3'
 
 local src_dir, build_dir = ...
 package.path  = src_dir .. "?.lua;" .. package.path
@@ -18,6 +18,7 @@ function test_basic()
       function(loop, async, revents)
          ok(true, 'async callback')
          ok(ev.ASYNC == revents, 'ev.ASYNC(' .. ev.ASYNC .. ') == revents (' .. revents .. ')')
+         async:stop(loop)
       end)
    async1:start(loop)
    async1:send(loop)

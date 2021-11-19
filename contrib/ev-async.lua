@@ -1,3 +1,33 @@
+-- WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! 
+--
+--      Use this code at your own risk. If one Lua VM has a loop or async watcher
+--      that goes out of scope and is used by a different Lua VM, your process
+--      will crash and/or behave in unexpected ways.
+--
+-- WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! 
+--
+-- Want something safer? Feel free to contribute!
+--
+-- One idea is to allocate all ev_loop and ev_async objects into a pool shared
+-- shared across all uses of this library (aka a statically allocated array). This
+-- pool would also contain reference counts for each object.
+--
+-- The userdata objects for loop and async watchers could then be changed to
+-- reference the index into that pool.
+--
+-- We could then "serialize" an ev_loop or ev_async object by returning the index.
+--
+-- The "deserialize" would allocate an userdata that points to this index and
+-- increment the reference count (assuming that an object of the correct type
+-- exists at this index, otherwise throw an error).
+--
+-- Note that all allocations (and deallocations) of loop and async watchers would
+-- require a mutex to ensure only one thread modifies this data at one time.
+
+
+
+-- Contribution from https://github.com/ImagicTheCat
+--
 -- Extension for lua-ev and LuaJIT to trigger async watchers from other threads.
 local ev = require("ev")
 local ffi = require("ffi")

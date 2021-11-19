@@ -1,4 +1,4 @@
-print '1..17'
+print '1..20'
 
 local src_dir, build_dir = ...
 package.path  = src_dir .. "?.lua;" .. package.path

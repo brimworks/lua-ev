@@ -5,8 +5,7 @@ package.cpath = build_dir .. "?.so;" .. package.cpath
 -- This test relies on socket support:
 local has_socket, socket = pcall(require, "socket")
 if not has_socket then
-   print '1..0'
-   print('# SKIP: No socket library available (' .. socket .. ')')
+   print('1..0 # Skipped: No socket library available (' .. socket .. ')')
    os.exit(0)
 end
 print '1..??'
