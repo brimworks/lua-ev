@@ -2,7 +2,7 @@ package = "lua-ev"
 version = "scm-1"
 
 source = {
-   url = "git://github.com/brimworks/lua-ev.git"
+   url = "git+https://github.com/brimworks/lua-ev.git"
 }
 
 description = {
